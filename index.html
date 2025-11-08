@@ -95,6 +95,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
+
         }
 
         /* Mobile Frame for focused view on large screens, responsive on small screens */
@@ -102,34 +103,9 @@
             width: 100%;
             height: 100%;
             position: relative;
-            overflow: hidden;
             background-color: #ffffff;
-        }
+            margin: auto;
 
-        /* Desktop Optimization: Center and constrain content to mobile size */
-        @media (min-width: 768px) {
-            .mobile-frame {
-                /* Use vh for viewport height, but manage app scrolling internally */
-                max-width: 420px;
-                /* Max width of a typical phone */
-                max-height: 90vh;
-                /* Limit height on desktop */
-                margin: auto;
-                border-radius: 1.5rem;
-                /* Rounded corners for the "phone" */
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                border: 8px solid #374151;
-                /* Dark border to simulate phone */
-            }
-
-            .body-container {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                padding: 2rem;
-                /* Add padding around the frame */
-            }
         }
 
         .stage-card:hover {
