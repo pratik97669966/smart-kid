@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,24 +12,40 @@
     <!-- Load Firebase (Required imports for Auth and Realtime Database) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // NOTE: We import all necessary functions here
         import { getAuth, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // --- EXPOSE FIREBASE FUNCTIONS GLOBALLY ---
-        // This is the fix for the ReferenceError, making the functions available to the global script environment.
+        // Auth Functions
         window.getAuth = getAuth;
         window.GoogleAuthProvider = GoogleAuthProvider;
         window.signInWithPopup = signInWithPopup;
-        window.signOut = signOut; 
-        
-        // Global Firebase variables will be populated here
-        window.firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        window.signOut = signOut;
+
+        // Realtime Database Functions
+        window.ref = ref;
+        window.set = set;
+        window.get = get;
+        window.update = update;
+
+        // --- USER-PROVIDED CONFIG ---
+        // Overwriting __firebase_config usage with user's explicit config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaJX0lmumC-6J-iTHVB_PRe50Ww8oWp_g",
+            authDomain: "smart-kid-balgram.firebaseapp.com",
+            databaseURL: "https://smart-kid-balgram-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "smart-kid-balgram",
+            storageBucket: "smart-kid-balgram.firebasestorage.app",
+            messagingSenderId: "340279199689",
+            appId: "1:340279199689:web:8d45a29b1ea87f3869ca18",
+            measurementId: "G-W402LPG44J"
+        };
+
         window.initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smart-kid-app';
 
-        if (window.firebaseConfig) {
-            window.app = initializeApp(window.firebaseConfig);
+        if (firebaseConfig) {
+            window.app = initializeApp(firebaseConfig);
             window.auth = getAuth(window.app);
             window.db = getDatabase(window.app);
             window.googleProvider = new GoogleAuthProvider();
@@ -54,7 +71,7 @@
 
                 if (splash) splash.classList.add('hidden');
                 if (mainApp) mainApp.classList.remove('hidden');
-                
+
                 // Start the main JS logic after auth is settled
                 if (typeof window.initApp === 'function') {
                     window.initApp();
@@ -67,18 +84,24 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        
+
         :root {
-            --primary: #8b5cf6; /* Violet-500 */
-            --secondary: #fcd34d; /* Amber-300 */
-            --success: #10b981; /* Emerald-500 */
-            --danger: #ef4444; /* Red-500 */
-            --bg-dark: #1f2937; /* Gray-800 */
+            --primary: #8b5cf6;
+            /* Violet-500 */
+            --secondary: #fcd34d;
+            /* Amber-300 */
+            --success: #10b981;
+            /* Emerald-500 */
+            --danger: #ef4444;
+            /* Red-500 */
+            --bg-dark: #1f2937;
+            /* Gray-800 */
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
+            background-color: #f3f4f6;
+            /* Light gray background */
         }
 
         /* Custom Mobile View Styling (Android-like card effect) */
@@ -91,7 +114,7 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        
+
         /* Gamification Styles */
         .stage-card {
             transition: all 0.3s ease;
@@ -111,15 +134,92 @@
         }
 
         @keyframes correctPulse {
-            0% { transform: scale(1); background-color: white; }
-            50% { transform: scale(1.05); background-color: var(--success); }
-            100% { transform: scale(1); background-color: white; }
+            0% {
+                transform: scale(1);
+                background-color: white;
+            }
+
+            50% {
+                transform: scale(1.05);
+                background-color: var(--success);
+            }
+
+            100% {
+                transform: scale(1);
+                background-color: white;
+            }
         }
 
         @keyframes wrongShake {
-            0%, 100% { transform: translateX(0); background-color: white; }
-            20%, 60% { transform: translateX(-5px); background-color: var(--danger); }
-            40%, 80% { transform: translateX(5px); background-color: var(--danger); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+                background-color: white;
+            }
+
+            20%,
+            60% {
+                transform: translateX(-5px);
+                background-color: var(--danger);
+            }
+
+            40%,
+            80% {
+                transform: translateX(5px);
+                background-color: var(--danger);
+            }
+        }
+
+        /* Stage Path Styling (Candy Crush Path) */
+        #stage-list {
+            position: relative;
+            padding-top: 50px;
+            padding-bottom: 50px;
+            background: linear-gradient(to bottom, #d1d5db 0%, #f3f4f6 100%);
+            border-radius: 1rem;
+        }
+
+        .stage-node {
+            position: relative;
+            margin: 30px auto;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            z-index: 10;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stage-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .stage-node::after {
+            content: '';
+            position: absolute;
+            top: 80px;
+            /* Position below node */
+            left: 50%;
+            width: 6px;
+            height: 60px;
+            /* Length of the connecting path */
+            background-color: #9ca3af;
+            /* Gray path */
+            z-index: 5;
+            transform: translateX(-50%);
+        }
+
+        .stage-node:last-child::after {
+            content: none;
+            /* No path after the last node */
         }
 
         /* Loading Spinner */
@@ -131,24 +231,31 @@
             height: 30px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
 
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
+
 <body class="p-4 md:p-10 min-h-screen bg-gray-100 flex items-center justify-center">
 
     <div class="mobile-frame">
-        
+
         <!-- Splash Screen / Loading -->
-        <div id="splash" class="absolute inset-0 flex flex-col items-center justify-center bg-violet-700 z-50 transition-opacity duration-500">
+        <div id="splash"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-violet-700 z-50 transition-opacity duration-500">
             <div class="text-4xl font-extrabold text-white animate-pulse">Smart Kid</div>
             <p class="text-white mt-2 text-sm">लोड होत आहे... (Loading...)</p>
             <div class="loader mt-4"></div>
         </div>
-        
+
         <!-- Main Application Container (Hidden until Auth is complete) -->
         <div id="main-app-container" class="h-full flex flex-col hidden">
 
@@ -156,14 +263,18 @@
             <header id="header-bar" class="p-4 bg-white shadow-md flex justify-between items-center z-10 sticky top-0">
                 <h1 id="header-title" class="text-xl font-bold text-gray-800"></h1>
                 <div class="flex items-center space-x-3">
-                    <button id="notification-btn" class="p-2 text-gray-500 hover:text-violet-500 rounded-full transition duration-150">
+                    <button id="notification-btn"
+                        class="p-2 text-gray-500 hover:text-violet-500 rounded-full transition duration-150">
                         <!-- Icon: Bell -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </button>
                     <div id="language-toggle" class="relative">
-                        <select id="lang-select" class="bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 transition duration-150">
+                        <select id="lang-select"
+                            class="bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 transition duration-150">
                             <option value="en">English</option>
                             <option value="mr">मराठी</option>
                             <option value="hi">हिन्दी</option>
@@ -174,14 +285,29 @@
 
             <!-- Main Content Area -->
             <main id="content-area" class="flex-grow overflow-y-auto p-4 pb-20">
-                
+
                 <!-- Login/Initial Setup View -->
-                <section id="login-view" class="h-full flex flex-col items-center justify-center text-center space-y-8 hidden">
+                <section id="login-view"
+                    class="h-full flex flex-col items-center justify-center text-center space-y-8 hidden">
                     <h2 id="login-welcome" class="text-3xl font-extrabold text-violet-700"></h2>
                     <p id="login-tagline" class="text-gray-600 text-lg"></p>
-                    
-                    <button id="google-sign-in-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:scale-105 flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.03c0-.75-.07-1.5-.2-2.25H12v4.25h6.05c-.27 1.42-1.09 2.61-2.25 3.44v3.13h4.03c2.36-2.17 3.78-5.38 3.78-9.57z" opacity=".87"/><path d="M12 23c3.27 0 6.01-1.08 8.01-2.92l-4.03-3.13c-1.16.78-2.61 1.25-4 1.25-3.08 0-5.7-2.07-6.62-4.82H1.32v3.23C3.59 20.26 7.5 23 12 23z" opacity=".87"/><path d="M5.38 14.15c-.2-.5-.31-1.04-.31-1.59s.11-1.09.31-1.59V8.04H1.32c-.59 1.14-.94 2.45-.94 3.86s.35 2.72.94 3.86l4.06-3.75z" opacity=".87"/><path d="M12 3.63c1.61 0 3.06.55 4.21 1.63l3.52-3.35C18.01 1.15 15.27 0 12 0 7.5 0 3.59 2.74 1.32 6.35l4.06 3.23c.92-2.75 3.54-4.82 6.62-4.82z" opacity=".87"/></svg>
+
+                    <button id="google-sign-in-btn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:scale-105 flex items-center space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path
+                                d="M22.56 12.03c0-.75-.07-1.5-.2-2.25H12v4.25h6.05c-.27 1.42-1.09 2.61-2.25 3.44v3.13h4.03c2.36-2.17 3.78-5.38 3.78-9.57z"
+                                opacity=".87" />
+                            <path
+                                d="M12 23c3.27 0 6.01-1.08 8.01-2.92l-4.03-3.13c-1.16.78-2.61 1.25-4 1.25-3.08 0-5.7-2.07-6.62-4.82H1.32v3.23C3.59 20.26 7.5 23 12 23z"
+                                opacity=".87" />
+                            <path
+                                d="M5.38 14.15c-.2-.5-.31-1.04-.31-1.59s.11-1.09.31-1.59V8.04H1.32c-.59 1.14-.94 2.45-.94 3.86s.35 2.72.94 3.86l4.06-3.75z"
+                                opacity=".87" />
+                            <path
+                                d="M12 3.63c1.61 0 3.06.55 4.21 1.63l3.52-3.35C18.01 1.15 15.27 0 12 0 7.5 0 3.59 2.74 1.32 6.35l4.06 3.23c.92-2.75 3.54-4.82 6.62-4.82z"
+                                opacity=".87" />
+                        </svg>
                         <span id="google-sign-in-text">Sign in with Google</span>
                     </button>
                 </section>
@@ -193,12 +319,16 @@
 
                     <form id="profile-setup-form" class="space-y-4">
                         <div>
-                            <label id="label-age" for="user-age" class="block text-sm font-medium text-gray-700">Age (वय)</label>
-                            <input type="number" id="user-age" required min="8" max="18" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
+                            <label id="label-age" for="user-age" class="block text-sm font-medium text-gray-700">Age
+                                (वय)</label>
+                            <input type="number" id="user-age" required min="8" max="18"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
                         </div>
                         <div>
-                            <label id="label-standard" for="user-standard" class="block text-sm font-medium text-gray-700">Standard (इयत्ता)</label>
-                            <select id="user-standard" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
+                            <label id="label-standard" for="user-standard"
+                                class="block text-sm font-medium text-gray-700">Standard (इयत्ता)</label>
+                            <select id="user-standard" required
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
                                 <option value="" disabled selected>Select Standard</option>
                                 <option value="5">5th Standard</option>
                                 <option value="6">6th Standard</option>
@@ -209,44 +339,57 @@
                             </select>
                         </div>
                         <div>
-                            <label id="label-medium" for="user-medium" class="block text-sm font-medium text-gray-700">Medium (माध्यम)</label>
-                            <select id="user-medium" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
+                            <label id="label-medium" for="user-medium"
+                                class="block text-sm font-medium text-gray-700">Medium (माध्यम)</label>
+                            <select id="user-medium" required
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
                                 <option value="" disabled selected>Select Medium</option>
                                 <option value="CBSE">CBSE (सीबीएसई)</option>
                                 <option value="State">State Board (राज्य मंडळ)</option>
                             </select>
                         </div>
-                        <button id="save-profile-btn" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                        <button id="save-profile-btn" type="submit"
+                            class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                             <span id="save-profile-text">Save Profile</span>
                         </button>
                     </form>
                 </section>
-                
+
                 <!-- Dashboard View -->
                 <section id="dashboard-view" class="space-y-6 hidden">
                     <!-- Profile Card -->
-                    <div class="p-6 bg-violet-500 text-white rounded-xl shadow-xl flex items-center justify-between">
+                    <div class="p-6 bg-violet-600 text-white rounded-2xl shadow-xl flex items-center justify-between">
                         <div>
                             <p id="welcome-greeting" class="text-xl font-medium"></p>
                             <h2 id="dashboard-user-name" class="text-3xl font-extrabold truncate max-w-[200px]"></h2>
+                            <p class="text-sm opacity-90 mt-1">Score: <span id="dashboard-user-score">0</span></p>
                         </div>
-                        <img id="dashboard-profile-img" src="https://placehold.co/64x64/8b5cf6/ffffff?text=P" class="w-16 h-16 rounded-full border-4 border-white object-cover shadow-md" alt="Profile Picture">
+                        <img id="dashboard-profile-img" src="https://placehold.co/64x64/8b5cf6/ffffff?text=P"
+                            class="w-16 h-16 rounded-full border-4 border-white object-cover shadow-md"
+                            alt="Profile Picture">
                     </div>
 
                     <!-- Weekly Test Card (Gamified/Premium) -->
-                    <div id="weekly-test-card" class="p-4 bg-yellow-400 rounded-xl shadow-lg border-4 border-yellow-600 transform transition duration-300 hover:scale-[1.02] cursor-pointer hidden" onclick="startWeeklyTest()">
+                    <div id="weekly-test-card"
+                        class="p-4 bg-yellow-400 rounded-2xl shadow-lg border-4 border-yellow-600 transform transition duration-300 hover:scale-[1.02] cursor-pointer hidden">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-800" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z" clip-rule="evenodd" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-800"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z"
+                                        clip-rule="evenodd" />
+                                </svg>
                                 <div>
                                     <h3 id="test-card-title" class="text-xl font-bold text-yellow-800"></h3>
                                     <p id="test-card-status" class="text-sm text-yellow-700"></p>
                                 </div>
                             </div>
-                            <button id="test-card-btn" class="bg-yellow-800 text-white text-sm font-bold py-1 px-4 rounded-full shadow-md"></button>
+                            <button id="test-card-btn"
+                                class="bg-yellow-800 text-white text-sm font-bold py-1 px-4 rounded-full shadow-md"></button>
                         </div>
                     </div>
-                    
+
                     <!-- Subject Selection Grid -->
                     <h3 id="subjects-heading" class="text-2xl font-extrabold text-gray-800 pt-2"></h3>
                     <div id="subject-grid" class="grid grid-cols-2 gap-4">
@@ -258,7 +401,7 @@
                 <section id="stage-selection-view" class="space-y-6 hidden">
                     <h2 id="stage-selection-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
                     <p id="stage-selection-subtitle" class="text-center text-gray-600"></p>
-                    <div id="stage-list" class="flex flex-col space-y-4">
+                    <div id="stage-list" class="flex flex-col space-y-20 p-8">
                         <!-- Stages/Levels will be injected here (Difficulty Levels: Easy, Medium, Hard) -->
                     </div>
                 </section>
@@ -267,9 +410,11 @@
                 <section id="quiz-view" class="space-y-4 hidden">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-200">
                         <div id="quiz-status" class="text-lg font-semibold text-violet-600"></div>
-                        <div id="quiz-timer" class="text-xl font-bold text-red-500 border border-red-500 rounded-full px-3 py-1">00:00</div>
+                        <div id="quiz-timer"
+                            class="text-xl font-bold text-red-500 border border-red-500 rounded-full px-3 py-1">00:00
+                        </div>
                     </div>
-                    
+
                     <div class="p-4 bg-white rounded-xl shadow-lg">
                         <p id="quiz-question-text" class="text-xl font-medium text-gray-800"></p>
                     </div>
@@ -279,27 +424,32 @@
                     </div>
 
                     <div class="flex justify-between pt-4">
-                        <button id="quiz-next-btn" class="bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-300 hidden" disabled>
+                        <button id="quiz-next-btn"
+                            class="bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-300 hidden"
+                            disabled>
                             <span id="next-btn-text">Next Question</span>
                         </button>
                     </div>
                 </section>
-                
+
                 <!-- Quiz Result View -->
                 <section id="quiz-result-view" class="text-center space-y-6 hidden">
                     <h2 id="result-title" class="text-4xl font-extrabold text-violet-700"></h2>
                     <p id="result-tagline" class="text-xl text-gray-600"></p>
-                    <div id="result-score-ring" class="mx-auto w-32 h-32 flex items-center justify-center rounded-full border-8 border-success bg-green-100 shadow-xl">
+                    <div id="result-score-ring"
+                        class="mx-auto w-32 h-32 flex items-center justify-center rounded-full border-8 border-success bg-green-100 shadow-xl">
                         <span id="result-score" class="text-4xl font-bold text-success"></span>
                     </div>
 
                     <p id="result-details" class="text-lg font-medium text-gray-700"></p>
-                    
+
                     <div class="flex flex-col space-y-4">
-                        <button id="review-answers-btn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                        <button id="review-answers-btn"
+                            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                             <span id="review-btn-text">Review Answers</span>
                         </button>
-                        <button id="back-to-dashboard-btn" class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                        <button id="back-to-dashboard-btn"
+                            class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                             <span id="dashboard-btn-text">Back to Dashboard</span>
                         </button>
                     </div>
@@ -311,7 +461,8 @@
                     <div id="review-list" class="space-y-6">
                         <!-- Reviewed questions will be injected here -->
                     </div>
-                    <button id="close-review-btn" class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                    <button id="close-review-btn"
+                        class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                         <span id="close-review-text">Back to Results</span>
                     </button>
                 </section>
@@ -320,15 +471,21 @@
                 <section id="profile-view" class="space-y-6 hidden">
                     <h2 id="profile-page-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
                     <div class="p-6 bg-white rounded-xl shadow-2xl space-y-4">
-                        <img id="profile-page-img" src="https://placehold.co/100x100/8b5cf6/ffffff?text=P" class="w-24 h-24 rounded-full border-4 border-violet-500 object-cover mx-auto shadow-lg" alt="Profile Picture">
+                        <img id="profile-page-img" src="https://placehold.co/100x100/8b5cf6/ffffff?text=P"
+                            class="w-24 h-24 rounded-full border-4 border-violet-500 object-cover mx-auto shadow-lg"
+                            alt="Profile Picture">
                         <p id="profile-user-name" class="text-2xl font-bold text-center"></p>
                         <p id="profile-user-id" class="text-xs text-gray-500 text-center truncate"></p>
                         <div id="profile-details" class="space-y-2">
-                            <p id="profile-standard" class="text-gray-700"><span class="font-semibold">Standard:</span> 10th</p>
-                            <p id="profile-medium" class="text-gray-700"><span class="font-semibold">Medium:</span> CBSE</p>
+                            <p id="profile-standard" class="text-gray-700"><span class="font-semibold">Standard:</span>
+                                10th</p>
+                            <p id="profile-medium" class="text-gray-700"><span class="font-semibold">Medium:</span> CBSE
+                            </p>
                         </div>
+                        <p id="test-paid-status" class="text-sm text-center font-medium"></p>
                     </div>
-                    <button id="sign-out-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                    <button id="sign-out-btn"
+                        class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                         <span id="sign-out-text">Sign Out</span>
                     </button>
                 </section>
@@ -341,7 +498,7 @@
                         <p id="leaderboard-loading" class="text-center text-gray-500"></p>
                     </div>
                 </section>
-                
+
                 <!-- History View -->
                 <section id="history-view" class="space-y-4 hidden">
                     <h2 id="history-title" class="text-3xl font-extrabold text-violet-700 border-b pb-2"></h2>
@@ -352,13 +509,17 @@
                 </section>
 
                 <!-- Global Modal for custom alerts/confirmation (No alert() allowed) -->
-                <div id="global-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50">
-                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full transform transition-all scale-100 ease-out duration-300">
+                <div id="global-modal"
+                    class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50">
+                    <div
+                        class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full transform transition-all scale-100 ease-out duration-300">
                         <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
                         <p id="modal-message" class="text-gray-600 mb-6"></p>
                         <div class="flex justify-end space-x-3">
-                            <button id="modal-cancel-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition duration-150">Cancel</button>
-                            <button id="modal-confirm-btn" class="px-4 py-2 bg-violet-500 text-white rounded-full hover:bg-violet-600 transition duration-150">Confirm</button>
+                            <button id="modal-cancel-btn"
+                                class="px-4 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition duration-150">Cancel</button>
+                            <button id="modal-confirm-btn"
+                                class="px-4 py-2 bg-violet-500 text-white rounded-full hover:bg-violet-600 transition duration-150">Confirm</button>
                         </div>
                     </div>
                 </div>
@@ -366,25 +527,46 @@
             </main>
 
             <!-- Bottom Navigation Bar (Fixed for Mobile Feel) -->
-            <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white border-t border-gray-200 shadow-2xl flex justify-around items-center h-16 z-20">
+            <nav id="bottom-nav"
+                class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white border-t border-gray-200 shadow-2xl flex justify-around items-center h-16 z-20">
                 <!-- Dashboard -->
-                <button data-view="dashboard" class="nav-item flex flex-col items-center p-2 text-violet-500 font-medium transition duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <button data-view="dashboard"
+                    class="nav-item flex flex-col items-center p-2 text-violet-500 font-medium transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
                     <span id="nav-dashboard-text" class="text-xs">Dashboard</span>
                 </button>
                 <!-- Leaderboard -->
-                <button data-view="leaderboard" class="nav-item flex flex-col items-center p-2 text-gray-500 hover:text-violet-500 font-medium transition duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.765a2 2 0 01.358.31l1.598 1.597a2 2 0 010 2.828l-1.598 1.598a2 2 0 01-.358.31H14m-12 0h4.765a2 2 0 00.358.31l1.598 1.597a2 2 0 000 2.828l-1.598 1.598a2 2 0 00-.358.31H12M3 21h18" /></svg>
+                <button data-view="leaderboard"
+                    class="nav-item flex flex-col items-center p-2 text-gray-500 hover:text-violet-500 font-medium transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 10h4.765a2 2 0 01.358.31l1.598 1.597a2 2 0 010 2.828l-1.598 1.598a2 2 0 01-.358.31H14m-12 0h4.765a2 2 0 00.358.31l1.598 1.597a2 2 0 000 2.828l-1.598 1.598a2 2 0 00-.358.31H12M3 21h18" />
+                    </svg>
                     <span id="nav-leaderboard-text" class="text-xs">Leaderboard</span>
                 </button>
                 <!-- History -->
-                <button data-view="history" class="nav-item flex flex-col items-center p-2 text-gray-500 hover:text-violet-500 font-medium transition duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <button data-view="history"
+                    class="nav-item flex flex-col items-center p-2 text-gray-500 hover:text-violet-500 font-medium transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span id="nav-history-text" class="text-xs">History</span>
                 </button>
                 <!-- Profile -->
-                <button data-view="profile" class="nav-item flex flex-col items-center p-2 text-gray-500 hover:text-violet-500 font-medium transition duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <button data-view="profile"
+                    class="nav-item flex flex-col items-center p-2 text-gray-500 hover:text-violet-500 font-medium transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                     <span id="nav-profile-text" class="text-xs">Profile</span>
                 </button>
             </nav>
@@ -392,790 +574,829 @@
         </div>
     </div>
 
-<script>
-    // --- GLOBAL STATE AND CONFIGURATION ---
-    const API_KEY = ""; // Placeholder for Canvas environment
-    const API_URL_GEMINI = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
-    
-    let currentView = 'dashboard';
-    let currentUser = null;
-    let userProfile = null;
-    let quizSession = null;
-    let currentLanguage = 'mr'; // Default to Marathi for Maharashtra students
-    let isWeeklyTestAvailable = false;
-    let isTestPaid = false; // Mock payment status
+    <script>
+        // --- GLOBAL STATE AND CONFIGURATION ---
+        // Using Open Trivia Database for free, vast question supply. Note: Only English is supported.
+        const API_URL_TRIVIA = 'https://opentdb.com/api.php';
 
-    const SUBJECTS = ['Math', 'Science', 'History', 'Geography', 'Marathi Grammar'];
-    const DIFFICULTIES = {
-        'easy': { label: { en: 'Easy', mr: 'सोपे', hi: 'आसान' }, color: 'bg-emerald-500', icon: 'M5 13l4 4L19 7' },
-        'medium': { label: { en: 'Medium', mr: 'मध्यम', hi: 'मध्यम' }, color: 'bg-yellow-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-        'hard': { label: { en: 'Hard', mr: 'कठीण', hi: 'कठिन' }, color: 'bg-red-500', icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8' }
-    };
-    
-    // Localization Texts
-    const TEXTS = {
-        'login-welcome': { en: 'Welcome to Smart Kid!', mr: 'स्मार्ट किडमध्ये आपले स्वागत आहे!', hi: 'स्मार्ट किड में आपका स्वागत है!' },
-        'login-tagline': { en: 'Learn like you play a game!', mr: 'खेळासारखे शिका!', hi: 'खेल की तरह सीखें!' },
-        'google-sign-in-text': { en: 'Sign in with Google', mr: 'गुगलने साइन इन करा', hi: 'Google से साइन इन करें' },
-        'setup-title': { en: 'Profile Setup', mr: 'प्रोफाइल सेटअप', hi: 'प्रोफ़ाइल सेट करें' },
-        'setup-tagline': { en: 'Tell us about yourself to tailor your content.', mr: 'सामग्री जुळवण्यासाठी आपल्याबद्दल सांगा.', hi: 'सामग्री अनुकूलित करने के लिए अपने बारे में बताएं।' },
-        'label-age': { en: 'Age (वय)', mr: 'वय (Age)', hi: 'आयु (Age)' },
-        'label-standard': { en: 'Standard (इयत्ता)', mr: 'इयत्ता (Standard)', hi: 'कक्षा (Standard)' },
-        'label-medium': { en: 'Medium (माध्यम)', mr: 'माध्यम (Medium)', hi: 'माध्यम (Medium)' },
-        'save-profile-text': { en: 'Save Profile & Start', mr: 'प्रोफाइल जतन करा आणि सुरू करा', hi: 'प्रोफ़ाइल सहेजें और शुरू करें' },
-        'nav-dashboard-text': { en: 'Dashboard', mr: 'डॅशबोर्ड', hi: 'डैशबोर्ड' },
-        'nav-leaderboard-text': { en: 'Leaderboard', mr: 'लीडरबोर्ड', hi: 'लीडरबोर्ड' },
-        'nav-history-text': { en: 'History', mr: 'इतिहास', hi: 'इतिहास' },
-        'nav-profile-text': { en: 'Profile', mr: 'प्रोफाइल', hi: 'प्रोफ़ाइल' },
-        'welcome-greeting': { en: 'Hello, Scholar!', mr: 'नमस्ते, विद्वाना!', hi: 'नमस्ते, विद्वान!' },
-        'subjects-heading': { en: 'Choose a Subject Stage:', mr: 'एक विषय निवडा:', hi: 'एक विषय चुनें:' },
-        'stage-selection-title': { en: 'Select Difficulty', mr: 'कठीण पातळी निवडा', hi: 'कठिनाई स्तर चुनें' },
-        'stage-selection-subtitle': { en: 'Higher difficulty means higher score points!', mr: 'जास्त कठिण म्हणजे जास्त गुण!', hi: 'अधिक कठिनाई का अर्थ है अधिक अंक!' },
-        'next-btn-text': { en: 'Next Question', mr: 'पुढचा प्रश्न', hi: 'अगला प्रश्न' },
-        'result-title-success': { en: 'Fantastic Job!', mr: 'अप्रतिम काम!', hi: 'शानदार काम!' },
-        'result-title-fail': { en: 'Good Effort!', mr: 'चांगला प्रयत्न!', hi: 'अच्छा प्रयास!' },
-        'result-tagline': { en: 'You earned {score} points!', mr: 'तुम्ही {score} गुण मिळवले!', hi: 'आपने {score} अंक अर्जित किए!' },
-        'result-details': { en: 'Solved: {solved}/{total} | Correct: {correct}', mr: 'सोडवले: {solved}/{total} | बरोबर: {correct}', hi: 'हल किए गए: {solved}/{total} | सही: {correct}' },
-        'review-btn-text': { en: 'Review Answers', mr: 'उत्तरांचे पुनरावलोकन करा', hi: 'उत्तरों की समीक्षा करें' },
-        'dashboard-btn-text': { en: 'Back to Dashboard', mr: 'डॅशबोर्डवर परत', hi: 'डैशबोर्ड पर वापस' },
-        'close-review-text': { en: 'Back to Results', mr: 'निकालांवर परत', hi: 'परिणामों पर वापस' },
-        'profile-page-title': { en: 'Your Profile', mr: 'तुमची प्रोफाइल', hi: 'आपकी प्रोफ़ाइल' },
-        'sign-out-text': { en: 'Sign Out', mr: 'साइन आउट करा', hi: 'साइन आउट करें' },
-        'test-card-title': { en: 'Weekly Scholar Test', mr: 'साप्ताहिक स्कॉलर चाचणी', hi: 'साप्ताहिक स्कॉलर टेस्ट' },
-        'test-card-status-inactive': { en: 'Check back next Sunday!', mr: 'पुढच्या रविवारी तपासा!', hi: 'अगले रविवार को देखें!' },
-        'test-card-status-active': { en: 'Test is Live! Click to Start.', mr: 'चाचणी लाईव्ह आहे! सुरू करण्यासाठी क्लिक करा.', hi: 'टेस्ट लाइव है! शुरू करने के लिए क्लिक करें।' },
-        'test-card-status-paid': { en: 'Paid Test: Join Now!', mr: 'सशुल्क चाचणी: आता सामील व्हा!', hi: 'सशुल्क टेस्ट: अभी जुड़ें!' },
-        'test-card-btn-start': { en: 'START', mr: 'सुरू करा', hi: 'शुरू करें' },
-        'test-card-btn-pay': { en: 'PAY (₹99)', mr: 'पेमेंट करा (₹99)', hi: 'भुगतान करें (₹99)' },
-        'leaderboard-title': { en: 'Top Global Scorers', mr: 'शीर्ष जागतिक स्कोअरर्स', hi: 'शीर्ष वैश्विक स्कोरर' },
-        'history-title': { en: 'My Quiz History', mr: 'माझा क्विझ इतिहास', hi: 'मेरा क्विज़ इतिहास' },
-        'history-loading': { en: 'Loading history...', mr: 'इतिहास लोड होत आहे...', hi: 'इतिहास लोड हो रहा है...' },
-        'leaderboard-loading': { en: 'Loading leaderboard...', mr: 'लीडरबोर्ड लोड होत आहे...', hi: 'लीडरबोर्ड लोड हो रहा है...' },
-        'question-loading': { en: 'Generating Question...', mr: 'प्रश्न तयार होत आहे...', hi: 'प्रश्न जनरेट हो रहा है...' },
-        'question-generating-error': { en: 'Could not generate question. Try again.', mr: 'प्रश्न तयार होऊ शकला नाही. पुन्हा प्रयत्न करा.', hi: 'प्रश्न जनरेट नहीं हो सका। पुनः प्रयास करें।' },
-        'modal-pay-title': { en: 'Confirm Payment', mr: 'पेमेंटची पुष्टी करा', hi: 'भुगतान की पुष्टि करें' },
-        'modal-pay-message': { en: 'This is a premium test. Confirm payment of ₹99 to unlock.', mr: 'ही प्रीमियम चाचणी आहे. अनलॉक करण्यासाठी ₹99 पेमेंटची पुष्टी करा.', hi: 'यह एक प्रीमियम टेस्ट है। अनलॉक करने के लिए ₹99 भुगतान की पुष्टि करें।' }
-    };
-    
-    // --- UTILITY FUNCTIONS ---
-    
-    // Get localized text
-    const L = (key) => TEXTS[key]?.[currentLanguage] || TEXTS[key]?.['en'] || key;
-    
-    // Set text content for all elements with a specific ID
-    const localizeElements = () => {
-        document.getElementById('header-title').textContent = 'Smart Kid';
-        document.getElementById('login-welcome').textContent = L('login-welcome');
-        document.getElementById('login-tagline').textContent = L('login-tagline');
-        document.getElementById('google-sign-in-text').textContent = L('google-sign-in-text');
-        
-        document.getElementById('setup-title').textContent = L('setup-title');
-        document.getElementById('setup-tagline').textContent = L('setup-tagline');
-        document.getElementById('label-age').textContent = L('label-age');
-        document.getElementById('label-standard').textContent = L('label-standard');
-        document.getElementById('label-medium').textContent = L('label-medium');
-        document.getElementById('save-profile-text').textContent = L('save-profile-text');
-        
-        document.getElementById('nav-dashboard-text').textContent = L('nav-dashboard-text');
-        document.getElementById('nav-leaderboard-text').textContent = L('nav-leaderboard-text');
-        document.getElementById('nav-history-text').textContent = L('nav-history-text');
-        document.getElementById('nav-profile-text').textContent = L('nav-profile-text');
-        
-        // Dynamic content that needs re-rendering
-        if (userProfile) {
-            document.getElementById('welcome-greeting').textContent = L('welcome-greeting');
-            document.getElementById('subjects-heading').textContent = L('subjects-heading');
+        let currentView = 'dashboard';
+        let currentUser = null;
+        let userProfile = null;
+        let quizSession = null;
+        let currentLanguage = 'mr';
+        let isWeeklyTestAvailable = false;
+        let isTestPaid = false;
+
+        const SUBJECTS = ['Math', 'Science', 'History', 'Geography', 'Marathi Grammar'];
+        // Open Trivia categories: 19: Math, 17: Science, 23: History, 22: Geography. Marathi Grammar will use a general category.
+        const TRIVIA_CATEGORIES = {
+            'Math': 19,
+            'Science': 17,
+            'History': 23,
+            'Geography': 22,
+            'Marathi Grammar': 9 // General Knowledge fallback
+        };
+
+        const DIFFICULTIES = {
+            'easy': { label: { en: 'Easy', mr: 'सोपे', hi: 'आसान' }, color: 'bg-emerald-500', icon: 'M5 13l4 4L19 7' },
+            'medium': { label: { en: 'Medium', mr: 'मध्यम', hi: 'मध्यम' }, color: 'bg-yellow-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+            'hard': { label: { en: 'Hard', mr: 'कठीण', hi: 'कठिन' }, color: 'bg-red-500', icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8' }
+        };
+
+        // Localization Texts
+        const TEXTS = {
+            'login-welcome': { en: 'Welcome to Smart Kid!', mr: 'स्मार्ट किडमध्ये आपले स्वागत आहे!', hi: 'स्मार्ट किड में आपका स्वागत है!' },
+            'login-tagline': { en: 'Learn like you play a game!', mr: 'खेळासारखे शिका!', hi: 'खेल की तरह सीखें!' },
+            'google-sign-in-text': { en: 'Sign in with Google', mr: 'गुगलने साइन इन करा', hi: 'Google से साइन इन करें' },
+            'setup-title': { en: 'Profile Setup', mr: 'प्रोफाइल सेटअप', hi: 'प्रोफ़ाइल सेट करें' },
+            'setup-tagline': { en: 'Tell us about yourself to tailor your content.', mr: 'सामग्री जुळवण्यासाठी आपल्याबद्दल सांगा.', hi: 'सामग्री अनुकूलित करने के लिए अपने बारे में बताएं।' },
+            'label-age': { en: 'Age (वय)', mr: 'वय (Age)', hi: 'आयु (Age)' },
+            'label-standard': { en: 'Standard (इयत्ता)', mr: 'इयत्ता (Standard)', hi: 'कक्षा (Standard)' },
+            'label-medium': { en: 'Medium (माध्यम)', mr: 'माध्यम (Medium)', hi: 'माध्यम (Medium)' },
+            'save-profile-text': { en: 'Save Profile & Start', mr: 'प्रोफाइल जतन करा आणि सुरू करा', hi: 'प्रोफ़ाइल सहेजें और शुरू करें' },
+            'nav-dashboard-text': { en: 'Dashboard', mr: 'डॅशबोर्ड', hi: 'डैशबोर्ड' },
+            'nav-leaderboard-text': { en: 'Leaderboard', mr: 'लीडरबोर्ड', hi: 'लीडरबोर्ड' },
+            'nav-history-text': { en: 'History', mr: 'इतिहास', hi: 'इतिहास' },
+            'nav-profile-text': { en: 'Profile', mr: 'प्रोफाइल', hi: 'प्रोफ़ाइल' },
+            'welcome-greeting': { en: 'Hello, Scholar!', mr: 'नमस्ते, विद्वाना!', hi: 'नमस्ते, विद्वान!' },
+            'subjects-heading': { en: 'Choose a Subject Stage:', mr: 'एक विषय निवडा:', hi: 'एक विषय चुनें:' },
+            'stage-selection-title': { en: 'Select Difficulty', mr: 'कठीण पातळी निवडा', hi: 'कठिनाई स्तर चुनें' },
+            'stage-selection-subtitle': { en: 'Higher difficulty means higher score points!', mr: 'जास्त कठिण म्हणजे जास्त गुण!', hi: 'अधिक कठिनाई का अर्थ है अधिक अंक!' },
+            'next-btn-text': { en: 'Next Question', mr: 'पुढचा प्रश्न', hi: 'अगला प्रश्न' },
+            'result-title-success': { en: 'Fantastic Job!', mr: 'अप्रतिम काम!', hi: 'शानदार काम!' },
+            'result-title-fail': { en: 'Good Effort!', mr: 'चांगला प्रयत्न!', hi: 'अच्छा प्रयास!' },
+            'result-tagline': { en: 'You earned {score} points!', mr: 'तुम्ही {score} गुण मिळवले!', hi: 'आपने {score} अंक अर्जित किए!' },
+            'result-details': { en: 'Solved: {solved}/{total} | Correct: {correct}', mr: 'सोडवले: {solved}/{total} | बरोबर: {correct}', hi: 'हल किए गए: {solved}/{total} | सही: {correct}' },
+            'review-btn-text': { en: 'Review Answers', mr: 'उत्तरांचे पुनरावलोकन करा', hi: 'उत्तरों की समीक्षा करें' },
+            'dashboard-btn-text': { en: 'Back to Dashboard', mr: 'डॅशबोर्डवर परत', hi: 'डैशबोर्ड पर वापस' },
+            'close-review-text': { en: 'Back to Results', mr: 'निकालांवर परत', hi: 'परिणामों पर वापस' },
+            'profile-page-title': { en: 'Your Profile', mr: 'तुमची प्रोफाइल', hi: 'आपकी प्रोफ़ाइल' },
+            'sign-out-text': { en: 'Sign Out', mr: 'साइन आउट करा', hi: 'साइन आउट करें' },
+            'test-card-title': { en: 'Weekly Scholar Test', mr: 'साप्ताहिक स्कॉलर चाचणी', hi: 'साप्ताहिक स्कॉलर टेस्ट' },
+            'test-card-status-inactive': { en: 'Check back next Sunday!', mr: 'पुढच्या रविवारी तपासा!', hi: 'अगले रविवार को देखें!' },
+            'test-card-status-active': { en: 'Test is Live! Click to Start.', mr: 'चाचणी लाईव्ह आहे! सुरू करण्यासाठी क्लिक करा.', hi: 'टेस्ट लाइव है! शुरू करने के लिए क्लिक करें।' },
+            'test-card-status-paid': { en: 'Test Paid!', mr: 'चाचणी सशुल्क!', hi: 'टेस्ट पेड!' },
+            'test-card-status-pay': { en: 'One-time fee: ₹9.00', mr: 'एक-वेळ शुल्क: ₹९.००', hi: 'एक बार का शुल्क: ₹९.००' },
+            'test-card-btn-start': { en: 'START', mr: 'सुरू करा', hi: 'शुरू करें' },
+            'test-card-btn-pay': { en: 'PAY ₹9.00', mr: 'पेमेंट करा ₹९.००', hi: 'भुगतान करें ₹९.००' },
+            'leaderboard-title': { en: 'Top Global Scorers', mr: 'शीर्ष जागतिक स्कोअरर्स', hi: 'शीर्ष वैश्विक स्कोरर' },
+            'history-title': { en: 'My Quiz History', mr: 'माझा क्विझ इतिहास', hi: 'मेरा क्विज़ इतिहास' },
+            'history-loading': { en: 'Loading history...', mr: 'इतिहास लोड होत आहे...', hi: 'इतिहास लोड हो रहा है...' },
+            'leaderboard-loading': { en: 'Loading leaderboard...', mr: 'लीडरबोर्ड लोड होत आहे...', hi: 'लीडरबोर्ड लोड हो रहा है...' },
+            'question-loading': { en: 'Fetching Questions...', mr: 'प्रश्न आणले जात आहेत...', hi: 'प्रश्न प्राप्त किए जा रहे हैं...' },
+            'question-generating-error': { en: 'Could not fetch questions. Try again.', mr: 'प्रश्न मिळू शकले नाही. पुन्हा प्रयत्न करा.', hi: 'प्रश्न प्राप्त नहीं हो सके। पुनः प्रयास करें।' },
+            'modal-pay-title': { en: 'One-time Payment for Test', mr: 'चाचणीसाठी एकदाच पेमेंट', hi: 'टेस्ट के लिए एक बार का भुगतान' },
+            'modal-pay-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock all weekly tests permanently.', mr: 'सर्व साप्ताहिक चाचण्या कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा.', hi: 'सभी साप्ताहिक टेस्ट को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें।' },
+            'review-explanation-text': { en: 'Correct Answer Explanation', mr: 'योग्य उत्तराचे स्पष्टीकरण', hi: 'सही उत्तर का स्पष्टीकरण' },
+            'profile-test-paid': { en: 'Weekly Test Status: PAID (Unlocked Permanently)', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क (कायमस्वरूपी अनलॉक)', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान किया गया (स्थायी रूप से अनलॉक)' },
+            'profile-test-unpaid': { en: 'Weekly Test Status: UNPAID', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क नाही', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान नहीं किया गया' }
+        };
+
+        // --- UTILITY FUNCTIONS ---
+
+        // Decode HTML entities (important for Open Trivia API)
+        const decodeHtml = (html) => {
+            const txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
         }
 
-        // Quiz/Result View localization
-        document.getElementById('next-btn-text').textContent = L('next-btn-text');
-        document.getElementById('review-btn-text').textContent = L('review-btn-text');
-        document.getElementById('dashboard-btn-text').textContent = L('dashboard-btn-text');
-        document.getElementById('close-review-text').textContent = L('close-review-text');
+        // Get localized text
+        const L = (key) => TEXTS[key]?.[currentLanguage] || TEXTS[key]?.['en'] || key;
 
-        // Profile/Leaderboard/History
-        document.getElementById('profile-page-title').textContent = L('profile-page-title');
-        document.getElementById('sign-out-text').textContent = L('sign-out-text');
-        document.getElementById('leaderboard-title').textContent = L('leaderboard-title');
-        document.getElementById('history-title').textContent = L('history-title');
-        document.getElementById('leaderboard-loading').textContent = L('leaderboard-loading');
-        document.getElementById('history-loading').textContent = L('history-loading');
+        // Set text content for all elements with a specific ID
+        const localizeElements = () => {
+            document.getElementById('header-title').textContent = 'Smart Kid';
+            document.getElementById('login-welcome').textContent = L('login-welcome');
+            document.getElementById('login-tagline').textContent = L('login-tagline');
+            document.getElementById('google-sign-in-text').textContent = L('google-sign-in-text');
 
-        // Re-render views to apply new language
-        if (userProfile) {
-             renderView(currentView);
-        }
-    };
+            document.getElementById('setup-title').textContent = L('setup-title');
+            document.getElementById('setup-tagline').textContent = L('setup-tagline');
+            document.getElementById('label-age').textContent = L('label-age');
+            document.getElementById('label-standard').textContent = L('label-standard');
+            document.getElementById('label-medium').textContent = L('label-medium');
+            document.getElementById('save-profile-text').textContent = L('save-profile-text');
 
-    // Tone.js Sound System (Gamified Interaction)
-    const synth = new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: "square" },
-        envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 },
-    }).toDestination();
-    
-    const playSound = (type) => {
-        try {
-            switch (type) {
-                case 'correct':
-                    synth.triggerAttackRelease(['C5', 'E5', 'G5'], '8n');
-                    break;
-                case 'wrong':
-                    synth.triggerAttackRelease('C4', '4n');
-                    break;
-                case 'next':
-                    synth.triggerAttackRelease('D4', '16n');
-                    break;
-                case 'level_up':
-                    synth.triggerAttackRelease(['C5', 'G5', 'C6'], '2n', '+0.1');
-                    break;
+            document.getElementById('nav-dashboard-text').textContent = L('nav-dashboard-text');
+            document.getElementById('nav-leaderboard-text').textContent = L('nav-leaderboard-text');
+            document.getElementById('nav-history-text').textContent = L('nav-history-text');
+            document.getElementById('nav-profile-text').textContent = L('nav-profile-text');
+
+            if (userProfile) {
+                document.getElementById('welcome-greeting').textContent = L('welcome-greeting');
+                document.getElementById('subjects-heading').textContent = L('subjects-heading');
             }
-        } catch (e) {
-            console.warn("Audio context not started or Tone.js error:", e);
-        }
-    };
 
-    // Exponential Backoff for API calls
-    const backoffFetch = async (url, options, maxRetries = 3) => {
-        for (let i = 0; i < maxRetries; i++) {
+            document.getElementById('next-btn-text').textContent = L('next-btn-text');
+            document.getElementById('review-btn-text').textContent = L('review-btn-text');
+            document.getElementById('dashboard-btn-text').textContent = L('dashboard-btn-text');
+            document.getElementById('close-review-text').textContent = L('close-review-text');
+
+            document.getElementById('profile-page-title').textContent = L('profile-page-title');
+            document.getElementById('sign-out-text').textContent = L('sign-out-text');
+            document.getElementById('leaderboard-title').textContent = L('leaderboard-title');
+            document.getElementById('history-title').textContent = L('history-title');
+            document.getElementById('leaderboard-loading').textContent = L('leaderboard-loading');
+            document.getElementById('history-loading').textContent = L('history-loading');
+
+            if (userProfile) {
+                renderView(currentView);
+                updateProfileUI(); // Ensure test status text is updated
+            }
+        };
+
+        // Tone.js Sound System (Gamified Interaction)
+        const synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "square" },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 },
+        }).toDestination();
+
+        const playSound = (type) => {
             try {
-                const response = await fetch(url, options);
-                if (response.status === 429) {
-                    throw new Error("Rate limit exceeded");
+                switch (type) {
+                    case 'correct':
+                        synth.triggerAttackRelease(['C5', 'E5', 'G5'], '8n');
+                        break;
+                    case 'wrong':
+                        synth.triggerAttackRelease('C4', '4n');
+                        break;
+                    case 'next':
+                        synth.triggerAttackRelease('D4', '16n');
+                        break;
+                    case 'level_up':
+                        synth.triggerAttackRelease(['C5', 'G5', 'C6'], '2n', '+0.1');
+                        break;
                 }
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            } catch (e) {
+                console.warn("Audio context not started or Tone.js error:", e);
+            }
+        };
+
+        // Exponential Backoff for API calls
+        const backoffFetch = async (url, options, maxRetries = 3) => {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429) {
+                        throw new Error("Rate limit exceeded");
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
-                return response.json();
+            }
+        };
+
+        // --- FIREBASE AND AUTHENTICATION LOGIC ---
+
+        const signInWithGoogle = async () => {
+            try {
+                await Tone.start();
+                const result = await window.signInWithPopup(window.auth, window.googleProvider);
+                const user = result.user;
             } catch (error) {
-                if (i === maxRetries - 1) throw error;
-                const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                await new Promise(resolve => setTimeout(resolve, delay));
+                console.error("Google Sign-In Error:", error);
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showModal(L('modal-error-title') || 'Error', error.message, false);
+                }
             }
-        }
-    };
-    
-    // --- FIREBASE AND AUTHENTICATION LOGIC (imported above) ---
+        };
 
-    // Sign in with Google Pop-up
-    const signInWithGoogle = async () => {
-        try {
-            await Tone.start(); // Start audio context on first user interaction
-            // FIX: Using window.signInWithPopup as it is globally exposed by the module
-            const result = await window.signInWithPopup(window.auth, window.googleProvider);
-            const user = result.user;
-            // The onAuthStateChanged listener will handle the rest
-        } catch (error) {
-            console.error("Google Sign-In Error:", error);
-            // Check if the error is the expected closed pop-up error before showing modal
-            if (error.code !== 'auth/popup-closed-by-user') {
-                 showModal(L('modal-error-title') || 'Error', error.message, false);
+        const signOutUser = async () => {
+            try {
+                await window.signOut(window.auth);
+                location.reload();
+            } catch (error) {
+                console.error("Sign Out Error:", error);
             }
-        }
-    };
+        };
 
-    const signOutUser = async () => {
-        try {
-            await window.signOut(window.auth);
-            // Reload to reset the app state
-            location.reload();
-        } catch (error) {
-            console.error("Sign Out Error:", error);
-        }
-    };
+        const checkOrCreateUserProfile = async (user) => {
+            const userRef = ref(window.db, `artifacts/${window.appId}/users/${user.uid}/profile`);
+            const snapshot = await get(userRef);
 
-    // Check/Create User Profile in Realtime DB
-    const checkOrCreateUserProfile = async (user) => {
-        const userRef = ref(window.db, `artifacts/${window.appId}/users/${user.uid}/profile`);
-        const snapshot = await get(userRef);
-        
-        if (snapshot.exists()) {
-            userProfile = snapshot.val();
-            // Ensure necessary fields are present, if not, force setup again
-            if (!userProfile.standard || !userProfile.medium) {
-                renderView('profile-setup');
+            if (snapshot.exists()) {
+                userProfile = snapshot.val();
+                // Ensure isTestPaid status exists
+                if (typeof userProfile.isTestPaid === 'undefined') {
+                    userProfile.isTestPaid = false;
+                    await update(userRef, { isTestPaid: false });
+                }
+                if (!userProfile.standard || !userProfile.medium) {
+                    renderView('profile-setup');
+                } else {
+                    currentUser = user;
+                    isTestPaid = userProfile.isTestPaid;
+                    renderView('dashboard');
+                }
             } else {
                 currentUser = user;
-                renderView('dashboard');
+                renderView('profile-setup');
             }
-        } else {
-            // New user, prompt for setup
-            currentUser = user;
-            renderView('profile-setup');
+            updateProfileUI();
+            checkWeeklyTestStatus();
+        };
+
+        const saveProfile = async (event) => {
+            event.preventDefault();
+            const age = document.getElementById('user-age').value;
+            const standard = document.getElementById('user-standard').value;
+            const medium = document.getElementById('user-medium').value;
+
+            if (!age || !standard || !medium) return;
+
+            const newProfile = {
+                name: currentUser.displayName || 'Smart Kid User',
+                email: currentUser.email || 'N/A',
+                photoURL: currentUser.photoURL || 'https://placehold.co/64x64/8b5cf6/ffffff?text=P',
+                age: parseInt(age),
+                standard: standard,
+                medium: medium,
+                score: 0,
+                isTestPaid: false, // Default unpaid
+                lastUpdated: Date.now()
+            };
+
+            const profileRef = ref(window.db, `artifacts/${window.appId}/users/${currentUser.uid}/profile`);
+            await set(profileRef, newProfile);
+            userProfile = newProfile;
+            isTestPaid = false;
+            updateProfileUI();
+            renderView('dashboard');
+        };
+
+        const updateProfileUI = () => {
+            if (userProfile) {
+                document.getElementById('dashboard-user-name').textContent = userProfile.name;
+                document.getElementById('dashboard-profile-img').src = userProfile.photoURL;
+                document.getElementById('dashboard-user-score').textContent = userProfile.score || 0;
+
+                document.getElementById('profile-page-img').src = userProfile.photoURL;
+                document.getElementById('profile-user-name').textContent = userProfile.name;
+                document.getElementById('profile-user-id').textContent = `User ID: ${window.userId}`;
+                document.getElementById('profile-standard').innerHTML = `<span class="font-semibold">${L('label-standard')}:</span> ${userProfile.standard}th`;
+                document.getElementById('profile-medium').innerHTML = `<span class="font-semibold">${L('label-medium')}:</span> ${userProfile.medium}`;
+
+                // Update Test Paid Status on Profile View
+                const paidStatusText = isTestPaid ? L('profile-test-paid') : L('profile-test-unpaid');
+                document.getElementById('test-paid-status').textContent = paidStatusText;
+                document.getElementById('test-paid-status').className = `text-sm text-center font-medium ${isTestPaid ? 'text-emerald-600' : 'text-red-600'}`;
+            }
+        };
+
+        const saveQuizHistory = async (session) => {
+            // Prepare session for saving (questions contain user answers and state)
+            const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history/${Date.now()}`);
+            await set(historyRef, session);
+
+            // Update global score
+            const newScore = (userProfile.score || 0) + session.score;
+            const userScoreRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
+            await update(userScoreRef, { score: newScore });
+            userProfile.score = newScore;
+            updateProfileUI(); // Update score on dashboard
+        };
+
+        // --- OPEN TRIVIA API FOR QUESTIONS ---
+
+        // Function to shuffle an array (Fisher-Yates)
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
         }
-        updateProfileUI();
-        checkWeeklyTestStatus();
-    };
 
-    const saveProfile = async (event) => {
-        event.preventDefault();
-        const age = document.getElementById('user-age').value;
-        const standard = document.getElementById('user-standard').value;
-        const medium = document.getElementById('user-medium').value;
-        
-        if (!age || !standard || !medium) return;
+        const fetchQuizQuestions = async (subject, difficulty, count = 10) => {
+            const categoryId = TRIVIA_CATEGORIES[subject] || 9; // Default to General
+            const diffParam = difficulty === 'hard' ? 'hard' : difficulty === 'medium' ? 'medium' : 'easy';
 
-        const newProfile = {
-            name: currentUser.displayName || 'Smart Kid User',
-            email: currentUser.email || 'N/A',
-            photoURL: currentUser.photoURL || 'https://placehold.co/64x64/8b5cf6/ffffff?text=P',
-            age: parseInt(age),
-            standard: standard,
-            medium: medium,
-            score: 0,
-            lastUpdated: Date.now()
-        };
+            // Use Type: multiple for MCQ
+            const url = `${API_URL_TRIVIA}?amount=${count}&category=${categoryId}&difficulty=${diffParam}&type=multiple`;
 
-        const profileRef = ref(window.db, `artifacts/${window.appId}/users/${currentUser.uid}/profile`);
-        await set(profileRef, newProfile);
-        userProfile = newProfile;
-        updateProfileUI();
-        renderView('dashboard');
-    };
+            const questionContainer = document.getElementById('quiz-question-text');
+            const optionsContainer = document.getElementById('quiz-options-container');
 
-    const updateProfileUI = () => {
-        if (userProfile) {
-            document.getElementById('dashboard-user-name').textContent = userProfile.name;
-            document.getElementById('dashboard-profile-img').src = userProfile.photoURL;
-            document.getElementById('profile-page-img').src = userProfile.photoURL;
-            document.getElementById('profile-user-name').textContent = userProfile.name;
-            document.getElementById('profile-user-id').textContent = `User ID: ${window.userId}`;
-            document.getElementById('profile-standard').innerHTML = `<span class="font-semibold">${L('label-standard')}:</span> ${userProfile.standard}th`;
-            document.getElementById('profile-medium').innerHTML = `<span class="font-semibold">${L('label-medium')}:</span> ${userProfile.medium}`;
-        }
-    };
+            questionContainer.innerHTML = `<div class="flex items-center justify-center space-x-2"><div class="loader border-violet-500"></div><p class="text-gray-500">${L('question-loading')}</p></div>`;
+            optionsContainer.innerHTML = '';
 
-    const saveQuizHistory = async (session) => {
-        const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history/${Date.now()}`);
-        await set(historyRef, session);
-
-        // Update global score
-        const newScore = (userProfile.score || 0) + session.score;
-        const userScoreRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile/score`);
-        await set(userScoreRef, newScore);
-        userProfile.score = newScore;
-    };
-    
-    // --- GEMINI API FOR DYNAMIC, LOCALIZED QUESTIONS ---
-    
-    const generateQuizPayload = (subject, standard, difficulty) => {
-        const systemPrompt = `Act as a multilingual educational content creator specializing in ${standard}th grade curriculum for the Maharashtra/Indian state boards. Your task is to generate one challenging multiple-choice question on the requested subject. Provide the question, options, and a concise explanation in English, Marathi, and Hindi. The difficulty level should be set to ${difficulty}.`;
-        
-        const userQuery = `Generate one multiple-choice question (MCQ) on ${subject} for Standard ${standard}.`;
-        
-        // JSON Schema for structured output
-        const responseSchema = {
-            type: "OBJECT",
-            properties: {
-                question_en: { type: "STRING" },
-                question_mr: { type: "STRING" },
-                question_hi: { type: "STRING" },
-                options_en: { type: "ARRAY", items: { type: "STRING" } },
-                options_mr: { type: "ARRAY", items: { type: "STRING" } },
-                options_hi: { type: "ARRAY", items: { type: "STRING" } },
-                correct_answer_index: { type: "INTEGER" }, // 0, 1, 2, or 3
-                explanation_en: { type: "STRING" },
-                explanation_mr: { type: "STRING" },
-                explanation_hi: { type: "STRING" },
-            },
-            required: ["question_en", "options_en", "correct_answer_index"],
-        };
-
-        return {
-            contents: [{ parts: [{ text: userQuery }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-            },
-        };
-    };
-
-    const fetchQuizQuestions = async (subject, difficulty, count = 10) => {
-        const standard = userProfile.standard;
-        const questions = [];
-        const questionContainer = document.getElementById('quiz-question-text');
-        const optionsContainer = document.getElementById('quiz-options-container');
-
-        questionContainer.innerHTML = `<div class="flex items-center justify-center space-x-2"><div class="loader"></div><p class="text-gray-500">${L('question-loading')}</p></div>`;
-        optionsContainer.innerHTML = '';
-        
-        for (let i = 0; i < count; i++) {
             try {
-                const payload = generateQuizPayload(subject, standard, difficulty);
-                
-                const response = await backoffFetch(API_URL_GEMINI, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const responseData = await backoffFetch(url);
 
-                const resultText = response.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!resultText) throw new Error("API returned empty content.");
-                
-                const questionData = JSON.parse(resultText);
-                questions.push({ ...questionData, attempted: false, userAnswer: -1 });
-
-            } catch (error) {
-                console.error("Gemini Question Fetch Error:", error);
-                questionContainer.textContent = L('question-generating-error');
-                showModal(L('modal-error-title') || 'Error', L('question-generating-error'), false);
-                return null;
-            }
-        }
-        
-        return questions;
-    };
-
-
-    // --- GAME LOGIC ---
-
-    const startQuiz = async (subject, difficulty, isTest = false) => {
-        const questionData = await fetchQuizQuestions(subject, difficulty, 10);
-        
-        if (!questionData) {
-            renderView('dashboard'); // Return to dashboard on failure
-            return;
-        }
-
-        quizSession = {
-            subject: subject,
-            difficulty: difficulty,
-            questions: questionData,
-            currentQIndex: 0,
-            score: 0,
-            correctCount: 0,
-            isTest: isTest,
-            startTime: Date.now(),
-            duration: 0,
-        };
-
-        renderView('quiz');
-        renderQuestion();
-        startQuizTimer();
-        playSound('next');
-    };
-    
-    let quizTimerInterval = null;
-    const startQuizTimer = () => {
-        const timerElement = document.getElementById('quiz-timer');
-        let totalSeconds = 0;
-        
-        clearInterval(quizTimerInterval);
-        quizTimerInterval = setInterval(() => {
-            totalSeconds++;
-            const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const seconds = String(totalSeconds % 60).padStart(2, '0');
-            timerElement.textContent = `${minutes}:${seconds}`;
-        }, 1000);
-    };
-
-    const stopQuizTimer = () => {
-        clearInterval(quizTimerInterval);
-        const timerText = document.getElementById('quiz-timer').textContent;
-        const parts = timerText.split(':').map(Number);
-        quizSession.duration = parts[0] * 60 + parts[1];
-    };
-
-    const renderQuestion = () => {
-        if (!quizSession) return;
-        const q = quizSession.questions[quizSession.currentQIndex];
-        const currentQ = quizSession.currentQIndex + 1;
-        const totalQ = quizSession.questions.length;
-
-        // Update status and timer
-        document.getElementById('quiz-status').textContent = `Q ${currentQ}/${totalQ} - ${quizSession.subject}`;
-        document.getElementById('quiz-timer').classList.remove('hidden');
-
-        // Get localized properties dynamically
-        const questionKey = `question_${currentLanguage}`;
-        const optionsKey = `options_${currentLanguage}`;
-        const options = q[optionsKey] || q.options_en;
-        const questionText = q[questionKey] || q.question_en;
-        
-        document.getElementById('quiz-question-text').textContent = questionText;
-        document.getElementById('quiz-next-btn').classList.add('hidden');
-        document.getElementById('quiz-next-btn').disabled = true;
-
-        const optionsContainer = document.getElementById('quiz-options-container');
-        optionsContainer.innerHTML = ''; // Clear previous options
-        optionsContainer.classList.remove('pointer-events-none'); // Enable clicks
-
-        options.forEach((option, index) => {
-            const button = document.createElement('button');
-            button.className = `w-full text-left p-4 bg-white rounded-xl shadow-md border-2 border-gray-200 transition duration-150 hover:border-violet-500 hover:shadow-lg focus:outline-none option-btn`;
-            button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-            button.dataset.index = index;
-            button.onclick = () => selectOption(index);
-            optionsContainer.appendChild(button);
-        });
-    };
-
-    const selectOption = (selectedIndex) => {
-        if (!quizSession) return;
-        
-        const q = quizSession.questions[quizSession.currentQIndex];
-        const isCorrect = selectedIndex === q.correct_answer_index;
-        
-        // Update session data
-        q.attempted = true;
-        q.userAnswer = selectedIndex;
-
-        // Disable further clicks
-        document.getElementById('quiz-options-container').classList.add('pointer-events-none');
-
-        const optionButtons = document.querySelectorAll('#quiz-options-container .option-btn');
-        optionButtons.forEach(btn => {
-            const index = parseInt(btn.dataset.index);
-            
-            btn.classList.remove('hover:border-violet-500', 'hover:shadow-lg');
-            
-            if (index === q.correct_answer_index) {
-                // Highlight correct answer
-                btn.classList.add('bg-emerald-100', 'border-emerald-500', 'correct-animation');
-            } else if (index === selectedIndex) {
-                // Highlight wrong answer selected by user
-                btn.classList.add('bg-red-100', 'border-red-500', 'wrong-animation');
-            } else {
-                 // Dim unselected wrong options
-                btn.classList.add('opacity-50');
-            }
-        });
-
-        if (isCorrect) {
-            quizSession.correctCount++;
-            // Scoring: 10 points * (1 + difficulty bonus: easy=0, medium=1, hard=2)
-            let difficultyBonus = 0;
-            if (quizSession.difficulty === 'medium') difficultyBonus = 1;
-            if (quizSession.difficulty === 'hard') difficultyBonus = 2;
-            quizSession.score += 10 * (1 + difficultyBonus);
-            playSound('correct');
-        } else {
-            playSound('wrong');
-        }
-
-        // Show Next button
-        document.getElementById('quiz-next-btn').classList.remove('hidden');
-        document.getElementById('quiz-next-btn').disabled = false;
-    };
-    
-    const nextQuestion = () => {
-        if (!quizSession) return;
-
-        if (quizSession.currentQIndex < quizSession.questions.length - 1) {
-            quizSession.currentQIndex++;
-            renderQuestion();
-            playSound('next');
-        } else {
-            // End of quiz
-            stopQuizTimer();
-            endQuiz();
-        }
-    };
-
-    const endQuiz = () => {
-        playSound('level_up');
-        saveQuizHistory(quizSession); // Save score/history to DB
-        renderView('result');
-    };
-
-    const renderResultView = () => {
-        const resultView = document.getElementById('quiz-result-view');
-        const titleElement = document.getElementById('result-title');
-        const scoreRing = document.getElementById('result-score-ring');
-        const scoreElement = document.getElementById('result-score');
-        const taglineElement = document.getElementById('result-tagline');
-        const detailsElement = document.getElementById('result-details');
-
-        const score = quizSession.score;
-        const totalQ = quizSession.questions.length;
-        const correctQ = quizSession.correctCount;
-        
-        if (correctQ / totalQ > 0.7) {
-            titleElement.textContent = L('result-title-success');
-            scoreRing.classList.replace('border-red-500', 'border-success');
-        } else {
-            titleElement.textContent = L('result-title-fail');
-            scoreRing.classList.replace('border-success', 'border-red-500');
-        }
-
-        scoreElement.textContent = score;
-        taglineElement.textContent = L('result-tagline').replace('{score}', score);
-        detailsElement.textContent = L('result-details')
-            .replace('{solved}', totalQ)
-            .replace('{total}', totalQ)
-            .replace('{correct}', correctQ);
-    };
-
-    const renderReviewView = () => {
-        const reviewList = document.getElementById('review-list');
-        reviewList.innerHTML = '';
-        document.getElementById('review-title').textContent = L('review-btn-text');
-
-        quizSession.questions.forEach((q, index) => {
-            const isCorrect = q.userAnswer === q.correct_answer_index;
-            
-            // Get localized properties
-            const questionKey = `question_${currentLanguage}`;
-            const explanationKey = `explanation_${currentLanguage}`;
-            const optionsKey = `options_${currentLanguage}`;
-
-            const qText = q[questionKey] || q.question_en;
-            const explanationText = q[explanationKey] || q.explanation_en;
-            const options = q[optionsKey] || q.options_en;
-
-            const card = document.createElement('div');
-            card.className = `p-4 rounded-xl shadow-lg border-l-4 ${isCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-red-500 bg-red-50'} space-y-3`;
-            
-            let html = `<p class="font-bold text-lg">${index + 1}. ${qText}</p>`;
-            
-            options.forEach((opt, optIndex) => {
-                const isUser = optIndex === q.userAnswer;
-                const isCorrectOption = optIndex === q.correct_answer_index;
-                let colorClass = 'text-gray-700';
-
-                if (isCorrectOption) {
-                    colorClass = 'font-bold text-emerald-600';
-                } else if (isUser && !isCorrect) {
-                    colorClass = 'font-bold text-red-600 line-through';
+                if (responseData.response_code !== 0) {
+                    throw new Error(`Trivia API Error Code: ${responseData.response_code}`);
                 }
 
-                html += `<p class="ml-4 text-sm ${colorClass}">${String.fromCharCode(65 + optIndex)}. ${opt} ${isCorrectOption ? '(Correct Answer)' : ''}</p>`;
+                const questions = responseData.results.map(q => {
+                    const incorrect = q.incorrect_answers.map(decodeHtml);
+                    const correct = decodeHtml(q.correct_answer);
+
+                    const allOptions = [...incorrect, correct];
+                    shuffleArray(allOptions);
+
+                    const correctIndex = allOptions.findIndex(opt => opt === correct);
+
+                    // Open Trivia questions are English only, so we duplicate English content
+                    // to fulfill the multilingual structure required by the app's rendering.
+                    return {
+                        question_en: decodeHtml(q.question),
+                        question_mr: decodeHtml(q.question), // Placeholder (English content)
+                        question_hi: decodeHtml(q.question), // Placeholder (English content)
+                        options_en: allOptions,
+                        options_mr: allOptions, // Placeholder (English options)
+                        options_hi: allOptions, // Placeholder (English options)
+                        correct_answer_index: correctIndex,
+                        explanation_en: `The correct answer is "${correct}".`, // Simple explanation
+                        explanation_mr: `योग्य उत्तर आहे: "${correct}"`,
+                        explanation_hi: `सही उत्तर है: "${correct}"`,
+                        attempted: false,
+                        userAnswer: -1
+                    };
+                });
+
+                return questions;
+
+            } catch (error) {
+                console.error("Trivia API Fetch Error:", error);
+                questionContainer.textContent = L('question-generating-error');
+                showModal('API Error', L('question-generating-error'), false);
+                return null;
+            }
+        };
+
+
+        // --- GAME LOGIC ---
+
+        const startQuiz = async (subject, difficulty, isTest = false) => {
+            const questionData = await fetchQuizQuestions(subject, difficulty, 10);
+
+            if (!questionData || questionData.length === 0) {
+                renderView('dashboard');
+                return;
+            }
+
+            quizSession = {
+                subject: subject,
+                difficulty: difficulty,
+                questions: questionData,
+                currentQIndex: 0,
+                score: 0,
+                correctCount: 0,
+                isTest: isTest,
+                startTime: Date.now(),
+                duration: 0,
+            };
+
+            renderView('quiz');
+            renderQuestion();
+            startQuizTimer();
+            playSound('next');
+        };
+
+        let quizTimerInterval = null;
+        const startQuizTimer = () => {
+            const timerElement = document.getElementById('quiz-timer');
+            let totalSeconds = 0;
+
+            clearInterval(quizTimerInterval);
+            quizTimerInterval = setInterval(() => {
+                totalSeconds++;
+                const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                timerElement.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        };
+
+        const stopQuizTimer = () => {
+            clearInterval(quizTimerInterval);
+            const timerText = document.getElementById('quiz-timer').textContent;
+            const parts = timerText.split(':').map(Number);
+            quizSession.duration = parts[0] * 60 + parts[1];
+        };
+
+        const renderQuestion = () => {
+            if (!quizSession) return;
+            const q = quizSession.questions[quizSession.currentQIndex];
+            const currentQ = quizSession.currentQIndex + 1;
+            const totalQ = quizSession.questions.length;
+
+            document.getElementById('quiz-status').textContent = `Q ${currentQ}/${totalQ} - ${quizSession.subject}`;
+            document.getElementById('quiz-timer').classList.remove('hidden');
+
+            const questionKey = `question_${currentLanguage}`;
+            const optionsKey = `options_${currentLanguage}`;
+            const options = q[optionsKey] || q.options_en;
+            const questionText = q[questionKey] || q.question_en;
+
+            document.getElementById('quiz-question-text').textContent = questionText;
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+            document.getElementById('quiz-next-btn').disabled = true;
+
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+            optionsContainer.classList.remove('pointer-events-none');
+
+            options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = `w-full text-left p-4 bg-white rounded-xl shadow-lg border-2 border-gray-200 transition duration-150 hover:border-violet-500 hover:shadow-xl focus:outline-none option-btn`;
+                button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                button.dataset.index = index;
+                button.onclick = () => selectOption(index);
+                optionsContainer.appendChild(button);
+            });
+        };
+
+        const selectOption = (selectedIndex) => {
+            if (!quizSession) return;
+
+            const q = quizSession.questions[quizSession.currentQIndex];
+            const isCorrect = selectedIndex === q.correct_answer_index;
+
+            q.attempted = true;
+            q.userAnswer = selectedIndex;
+
+            document.getElementById('quiz-options-container').classList.add('pointer-events-none');
+
+            const optionButtons = document.querySelectorAll('#quiz-options-container .option-btn');
+            optionButtons.forEach(btn => {
+                const index = parseInt(btn.dataset.index);
+
+                btn.classList.remove('hover:border-violet-500', 'hover:shadow-xl');
+
+                if (index === q.correct_answer_index) {
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'correct-animation');
+                } else if (index === selectedIndex) {
+                    btn.classList.add('bg-red-100', 'border-red-500', 'wrong-animation');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
             });
 
-            html += `<div class="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                         <p class="font-semibold text-violet-600">Explanation (${L('nav-history-text')}):</p>
+            if (isCorrect) {
+                quizSession.correctCount++;
+                let difficultyBonus = 0;
+                if (quizSession.difficulty === 'medium') difficultyBonus = 1;
+                if (quizSession.difficulty === 'hard') difficultyBonus = 2;
+                quizSession.score += 10 * (1 + difficultyBonus);
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+            document.getElementById('quiz-next-btn').disabled = false;
+        };
+
+        const nextQuestion = () => {
+            if (!quizSession) return;
+
+            if (quizSession.currentQIndex < quizSession.questions.length - 1) {
+                quizSession.currentQIndex++;
+                renderQuestion();
+                playSound('next');
+            } else {
+                stopQuizTimer();
+                endQuiz();
+            }
+        };
+
+        const endQuiz = () => {
+            playSound('level_up');
+            saveQuizHistory(quizSession);
+            renderView('result'); // FIX: Ensure this is the last step and correctly navigates.
+        };
+
+        const renderResultView = () => {
+            if (!quizSession) return; // FIX: Ensure quizSession exists before rendering
+
+            const titleElement = document.getElementById('result-title');
+            const scoreRing = document.getElementById('result-score-ring');
+            const scoreElement = document.getElementById('result-score');
+            const taglineElement = document.getElementById('result-tagline');
+            const detailsElement = document.getElementById('result-details');
+
+            const score = quizSession.score;
+            const totalQ = quizSession.questions.length;
+            const correctQ = quizSession.correctCount;
+
+            // Reset ring classes
+            scoreRing.classList.remove('border-success', 'border-red-500', 'bg-green-100', 'bg-red-100', 'text-success', 'text-red-500');
+
+            if (correctQ / totalQ > 0.7) {
+                titleElement.textContent = L('result-title-success');
+                scoreRing.classList.add('border-success', 'bg-green-100');
+                scoreElement.classList.add('text-success');
+            } else {
+                titleElement.textContent = L('result-title-fail');
+                scoreRing.classList.add('border-red-500', 'bg-red-100');
+                scoreElement.classList.add('text-red-500');
+            }
+
+            scoreElement.textContent = score;
+            taglineElement.textContent = L('result-tagline').replace('{score}', score);
+            detailsElement.textContent = L('result-details')
+                .replace('{solved}', totalQ)
+                .replace('{total}', totalQ)
+                .replace('{correct}', correctQ);
+        };
+
+        const reviewHistoricalQuiz = (sessionData) => {
+            // Use the saved session data for review
+            quizSession = sessionData;
+            renderView('review');
+            document.getElementById('close-review-btn').onclick = () => renderView('history');
+        }
+
+        const renderReviewView = () => {
+            if (!quizSession) return;
+
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            document.getElementById('review-title').textContent = `${L('review-btn-text')} - ${quizSession.subject}`;
+
+            quizSession.questions.forEach((q, index) => {
+                const isCorrect = q.userAnswer === q.correct_answer_index;
+
+                const questionKey = `question_${currentLanguage}`;
+                const explanationKey = `explanation_${currentLanguage}`;
+                const optionsKey = `options_${currentLanguage}`;
+
+                const qText = q[questionKey] || q.question_en;
+                const explanationText = q[explanationKey] || q.explanation_en;
+                const options = q[optionsKey] || q.options_en;
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl shadow-lg border-l-4 ${isCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-red-500 bg-red-50'} space-y-3`;
+
+                let html = `<p class="font-bold text-lg">${index + 1}. ${qText}</p>`;
+
+                options.forEach((opt, optIndex) => {
+                    const isUser = optIndex === q.userAnswer;
+                    const isCorrectOption = optIndex === q.correct_answer_index;
+                    let colorClass = 'text-gray-700';
+
+                    if (isCorrectOption) {
+                        colorClass = 'font-bold text-emerald-600';
+                    } else if (isUser && !isCorrect) {
+                        colorClass = 'font-bold text-red-600 line-through';
+                    }
+
+                    html += `<p class="ml-4 text-sm ${colorClass}">${String.fromCharCode(65 + optIndex)}. ${opt} ${isCorrectOption ? ' (Correct Answer)' : ''} ${isUser && !isCorrect ? ' (Your Answer)' : ''}</p>`;
+                });
+
+                html += `<div class="mt-3 p-3 bg-white rounded-lg border border-gray-200">
+                         <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
                          <p class="text-sm text-gray-800">${explanationText}</p>
                      </div>`;
-            
-            card.innerHTML = html;
-            reviewList.appendChild(card);
-        });
-    };
+
+                card.innerHTML = html;
+                reviewList.appendChild(card);
+            });
+        };
 
 
-    // --- UI/VIEW MANAGEMENT ---
+        // --- UI/VIEW MANAGEMENT ---
 
-    const hideAllViews = () => {
-        document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.replace('text-violet-500', 'text-gray-500'));
-        document.getElementById('quiz-timer').classList.add('hidden');
-    };
+        const hideAllViews = () => {
+            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.replace('text-violet-500', 'text-gray-500'));
+            document.getElementById('quiz-timer').classList.add('hidden');
+        };
 
-    const renderView = (viewName) => {
-        if (!currentUser && viewName !== 'login') {
-            viewName = 'login';
-        }
-        
-        hideAllViews();
-        currentView = viewName;
-        
-        // Show the active view
-        const viewElement = document.getElementById(`${viewName}-view`);
-        if (viewElement) viewElement.classList.remove('hidden');
+        const renderView = (viewName) => {
+            if (!currentUser && viewName !== 'login') {
+                viewName = 'login';
+            }
 
-        // Update Bottom Nav
-        const activeNavBtn = document.querySelector(`.nav-item[data-view="${viewName}"]`);
-        if (activeNavBtn) activeNavBtn.classList.replace('text-gray-500', 'text-violet-500');
+            hideAllViews();
+            currentView = viewName;
 
-        // Logic specific to each view
-        switch (viewName) {
-            case 'login':
-                document.getElementById('bottom-nav').classList.add('hidden');
-                break;
-            case 'profile-setup':
-                document.getElementById('bottom-nav').classList.add('hidden');
-                break;
-            case 'dashboard':
-                document.getElementById('bottom-nav').classList.remove('hidden');
-                renderDashboard();
-                break;
-            case 'stage-selection':
-                document.getElementById('bottom-nav').classList.remove('hidden');
-                document.getElementById('stage-selection-title').textContent = L('stage-selection-title');
-                document.getElementById('stage-selection-subtitle').textContent = L('stage-selection-subtitle');
-                break;
-            case 'quiz':
-                document.getElementById('bottom-nav').classList.add('hidden');
-                break;
-            case 'result':
-                document.getElementById('bottom-nav').classList.add('hidden');
-                renderResultView();
-                break;
-            case 'review':
-                document.getElementById('bottom-nav').classList.add('hidden');
-                renderReviewView();
-                break;
-            case 'profile':
-                document.getElementById('bottom-nav').classList.remove('hidden');
-                updateProfileUI();
-                break;
-            case 'leaderboard':
-                document.getElementById('bottom-nav').classList.remove('hidden');
-                renderLeaderboard();
-                break;
-            case 'history':
-                document.getElementById('bottom-nav').classList.remove('hidden');
-                renderHistory();
-                break;
-        }
-    };
-    
-    // --- DASHBOARD RENDERING ---
+            const viewElement = document.getElementById(`${viewName}-view`);
+            if (viewElement) viewElement.classList.remove('hidden');
 
-    const renderDashboard = () => {
-        checkWeeklyTestStatus(); // Recheck status every time dashboard is loaded
-        
-        const grid = document.getElementById('subject-grid');
-        grid.innerHTML = '';
-        
-        // Dynamically create subject cards (Gamified UI)
-        SUBJECTS.forEach(subject => {
-            const card = document.createElement('div');
-            card.className = `stage-card cursor-pointer p-4 bg-white rounded-xl shadow-lg border-b-4 border-violet-500 text-center`;
-            card.innerHTML = `
+            const activeNavBtn = document.querySelector(`.nav-item[data-view="${viewName}"]`);
+            if (activeNavBtn) activeNavBtn.classList.replace('text-gray-500', 'text-violet-500');
+
+            switch (viewName) {
+                case 'login':
+                case 'profile-setup':
+                    document.getElementById('bottom-nav').classList.add('hidden');
+                    break;
+                case 'dashboard':
+                    document.getElementById('bottom-nav').classList.remove('hidden');
+                    renderDashboard();
+                    break;
+                case 'result':
+                    document.getElementById('bottom-nav').classList.add('hidden');
+                    renderResultView();
+                    break;
+                case 'profile':
+                    document.getElementById('bottom-nav').classList.remove('hidden');
+                    updateProfileUI();
+                    break;
+                case 'leaderboard':
+                    document.getElementById('bottom-nav').classList.remove('hidden');
+                    renderLeaderboard();
+                    break;
+                case 'history':
+                    document.getElementById('bottom-nav').classList.remove('hidden');
+                    renderHistory();
+                    break;
+                case 'stage-selection':
+                case 'quiz':
+                case 'review':
+                    document.getElementById('bottom-nav').classList.add('hidden');
+                    break;
+            }
+        };
+
+        // --- DASHBOARD RENDERING & GAMIFIED STAGE SELECTION ---
+
+        const renderDashboard = () => {
+            checkWeeklyTestStatus();
+
+            const grid = document.getElementById('subject-grid');
+            grid.innerHTML = '';
+
+            SUBJECTS.forEach(subject => {
+                const card = document.createElement('div');
+                card.className = `stage-card cursor-pointer p-4 bg-white rounded-2xl shadow-xl border-b-4 border-violet-500 text-center transition duration-300 hover:shadow-2xl`;
+                card.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-violet-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${getSubjectIcon(subject)}" />
                 </svg>
                 <p class="font-bold text-lg text-gray-800">${subject}</p>
                 <p class="text-sm text-gray-500">${userProfile.standard}th Std</p>
             `;
-            card.onclick = () => renderStageSelection(subject);
-            grid.appendChild(card);
-        });
-    };
+                card.onclick = () => renderStageSelection(subject);
+                grid.appendChild(card);
+            });
+        };
 
-    const getSubjectIcon = (subject) => {
-        switch (subject) {
-            case 'Math': return 'M7 7h10l-2 10H9l-2-10zm1-5h8M8 22h8'; // Formula
-            case 'Science': return 'M9.75 17L9 20l-1.5-4H5m14.25 10c0 1.24-1.01 2.25-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V5.25C3.75 4.01 4.76 3 6 3h12a2.25 2.25 0 012.25 2.25v12.5zm-5.5-12.75v3.5h-3.5v-3.5h3.5z'; // Atom
-            case 'History': return 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'; // Clock
-            case 'Geography': return 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'; // Compass
-            case 'Marathi Grammar': return 'M4 6h16M4 12h16M4 18h7'; // Text/Book
-            default: return 'M4 6h16M4 12h16M4 18h16';
-        }
-    };
-    
-    const renderStageSelection = (subject) => {
-        renderView('stage-selection');
-        const list = document.getElementById('stage-list');
-        list.innerHTML = '';
-        document.getElementById('stage-selection-title').textContent = `${L('stage-selection-title')} - ${subject}`;
+        const getSubjectIcon = (subject) => {
+            switch (subject) {
+                case 'Math': return 'M7 7h10l-2 10H9l-2-10zm1-5h8M8 22h8';
+                case 'Science': return 'M9.75 17L9 20l-1.5-4H5m14.25 10c0 1.24-1.01 2.25-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V5.25C3.75 4.01 4.76 3 6 3h12a2.25 2.25 0 012.25 2.25v12.5zm-5.5-12.75v3.5h-3.5v-3.5h3.5z';
+                case 'History': return 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z';
+                case 'Geography': return 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6';
+                case 'Marathi Grammar': return 'M4 6h16M4 12h16M4 18h7';
+                default: return 'M4 6h16M4 12h16M4 18h16';
+            }
+        };
 
-        Object.keys(DIFFICULTIES).forEach(difficultyKey => {
-            const diff = DIFFICULTIES[difficultyKey];
-            const card = document.createElement('button');
-            card.className = `w-full stage-card p-5 ${diff.color} text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300`;
-            card.innerHTML = `
-                <div class="flex items-center space-x-4">
-                    <div class="p-3 bg-white bg-opacity-30 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${diff.icon}" />
-                        </svg>
-                    </div>
-                    <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
+        const renderStageSelection = (subject) => {
+            renderView('stage-selection');
+            const list = document.getElementById('stage-list');
+            list.innerHTML = '';
+            document.getElementById('stage-selection-title').textContent = `${L('stage-selection-title')} - ${subject}`;
+
+            let level = 1;
+
+            Object.keys(DIFFICULTIES).reverse().forEach(difficultyKey => {
+                const diff = DIFFICULTIES[difficultyKey];
+
+                const node = document.createElement('div');
+                node.className = 'flex flex-col items-center justify-center';
+
+                const nodeButton = document.createElement('button');
+                nodeButton.className = `stage-node ${diff.color} w-20 h-20 text-xl`;
+                nodeButton.innerHTML = `
+                <div class="text-center">
+                    <span class="block">${L(difficultyKey)}</span>
+                    <span class="text-xs opacity-80">Level ${level}</span>
                 </div>
-                <p class="font-semibold text-sm">Level ${difficultyKey.toUpperCase()}</p>
             `;
-            card.onclick = () => startQuiz(subject, difficultyKey, false);
-            list.appendChild(card);
-        });
-    };
+                nodeButton.onclick = () => startQuiz(subject, difficultyKey, false);
 
-    // --- WEEKLY TEST LOGIC (PREMIUM FEATURE) ---
+                const container = document.createElement('div');
+                container.className = 'stage-node-container relative flex flex-col items-center';
+                container.style.marginTop = `${level === 1 ? '0' : '60px'}`;
 
-    const checkWeeklyTestStatus = () => {
-        const today = new Date();
-        const testCard = document.getElementById('weekly-test-card');
-        const isSunday = today.getDay() === 0; // 0 is Sunday
+                // Add the path styling
+                if (level > 1) {
+                    const path = document.createElement('div');
+                    path.className = 'absolute top-[-60px] w-1 h-12 bg-gray-400 z-5';
+                    container.appendChild(path);
+                }
 
-        // Mock Admin Toggle: Set to true if it's Sunday
-        // In a real app, this would be fetched from a public admin setting in Firebase DB
-        const isTestEnabledByAdmin = isSunday; 
-        
-        testCard.classList.add('hidden'); // Hide by default
-        isWeeklyTestAvailable = false;
-        
-        if (isTestEnabledByAdmin) {
-            isWeeklyTestAvailable = true;
-            testCard.classList.remove('hidden');
+                container.appendChild(nodeButton);
+                list.prepend(container); // Prepend to show reverse order (Hard at the top)
+                level++;
+            });
+        };
+
+        // --- WEEKLY TEST LOGIC (PREMIUM FEATURE) ---
+
+        const checkWeeklyTestStatus = () => {
+            const today = new Date();
+            const testCard = document.getElementById('weekly-test-card');
+            const isSunday = today.getDay() === 0;
+
+            const isTestEnabledByAdmin = isSunday;
+
+            testCard.classList.add('hidden');
+            isWeeklyTestAvailable = false;
+            isTestPaid = userProfile.isTestPaid; // Load latest status
+
+            const cardBtn = document.getElementById('test-card-btn');
             document.getElementById('test-card-title').textContent = L('test-card-title');
 
-            if (isTestPaid) {
-                // Test is enabled and paid
-                document.getElementById('test-card-status').textContent = L('test-card-status-active');
-                document.getElementById('test-card-btn').textContent = L('test-card-btn-start');
-                testCard.onclick = () => startQuiz('Weekly Test', 'hard', true);
+            if (isTestEnabledByAdmin) {
+                isWeeklyTestAvailable = true;
+                testCard.classList.remove('hidden');
+
+                if (isTestPaid) {
+                    // Test is enabled and paid
+                    document.getElementById('test-card-status').textContent = L('test-card-status-active');
+                    cardBtn.textContent = L('test-card-btn-start');
+                    testCard.onclick = () => startQuiz('Weekly Test', 'hard', true);
+                } else {
+                    // Test is enabled but needs payment
+                    document.getElementById('test-card-status').textContent = L('test-card-status-pay');
+                    cardBtn.textContent = L('test-card-btn-pay');
+                    testCard.onclick = () => showPaymentModal();
+                }
             } else {
-                // Test is enabled but needs payment
-                document.getElementById('test-card-status').textContent = L('test-card-status-paid');
-                document.getElementById('test-card-btn').textContent = L('test-card-btn-pay');
-                testCard.onclick = () => showPaymentModal();
+                // Test is not available today
+                testCard.classList.remove('hidden');
+                testCard.classList.replace('bg-yellow-400', 'bg-gray-400');
+                testCard.classList.replace('border-yellow-600', 'border-gray-600');
+                document.getElementById('test-card-status').textContent = L('test-card-status-inactive');
+                cardBtn.textContent = 'CLOSED';
+                testCard.onclick = null;
             }
-        } else {
-            // Test is not available today
-            testCard.classList.remove('hidden');
-            testCard.classList.replace('bg-yellow-400', 'bg-gray-400');
-            testCard.classList.replace('border-yellow-600', 'border-gray-600');
-            document.getElementById('test-card-title').textContent = L('test-card-title');
-            document.getElementById('test-card-status').textContent = L('test-card-status-inactive');
-            document.getElementById('test-card-btn').textContent = 'CLOSED';
-            testCard.onclick = null;
-        }
-    };
-    
-    const showPaymentModal = () => {
-        showModal(
-            L('modal-pay-title'), 
-            L('modal-pay-message'), 
-            true, 
-            () => { 
-                // Mock payment success logic
-                isTestPaid = true; 
-                showModal('Success!', 'Payment successful. The test is now unlocked!', false);
-                checkWeeklyTestStatus(); // Update card to START
+        };
+
+        const showPaymentModal = () => {
+            showModal(
+                L('modal-pay-title'),
+                L('modal-pay-message'),
+                true,
+                () => {
+                    // MOCK PAYMENT SUCCESS: Simulates Razorpay redirect/callback after a short delay
+                    const modal = document.getElementById('global-modal');
+                    modal.classList.add('hidden'); // Hide confirmation modal
+                    showModal('Processing Payment...', 'Simulating transaction for ₹9.00. Please wait...', false);
+
+                    setTimeout(async () => {
+                        // Update user profile in database
+                        const userRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
+                        await update(userRef, { isTestPaid: true });
+
+                        isTestPaid = true;
+                        userProfile.isTestPaid = true;
+
+                        showModal('Success!', 'Payment successful. All weekly tests are now unlocked permanently!', false);
+                        checkWeeklyTestStatus(); // Update card to START
+                        updateProfileUI(); // Update profile status
+                    }, 2000);
+                }
+            );
+        };
+
+        // --- LEADERBOARD & HISTORY RENDERING ---
+
+        const renderLeaderboard = async () => {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = `<p class="text-center text-gray-500">${L('leaderboard-loading')}</p>`;
+
+            const usersRef = ref(window.db, `artifacts/${window.appId}/users`);
+            const snapshot = await get(usersRef);
+
+            if (!snapshot.exists()) {
+                list.innerHTML = `<p class="text-center text-gray-500">No scores yet.</p>`;
+                return;
             }
-        );
-    };
 
-    // --- LEADERBOARD & HISTORY RENDERING ---
+            const userData = snapshot.val();
+            let leaderboard = [];
 
-    const renderLeaderboard = async () => {
-        const list = document.getElementById('leaderboard-list');
-        list.innerHTML = `<p class="text-center text-gray-500">${L('leaderboard-loading')}</p>`;
-        
-        const usersRef = ref(window.db, `artifacts/${window.appId}/users`);
-        const snapshot = await get(usersRef);
-        
-        if (!snapshot.exists()) {
-            list.innerHTML = `<p class="text-center text-gray-500">No scores yet.</p>`;
-            return;
-        }
-
-        const userData = snapshot.val();
-        let leaderboard = [];
-        
-        // Extract profiles and format
-        for (const uid in userData) {
-            if (userData[uid].profile) {
-                leaderboard.push({
-                    uid: uid,
-                    ...userData[uid].profile
-                });
+            for (const uid in userData) {
+                if (userData[uid].profile) {
+                    leaderboard.push({
+                        uid: uid,
+                        ...userData[uid].profile
+                    });
+                }
             }
-        }
 
-        // Sort by score descending
-        leaderboard.sort((a, b) => (b.score || 0) - (a.score || 0));
-        
-        list.innerHTML = '';
-        
-        leaderboard.slice(0, 10).forEach((user, index) => {
-            const rank = index + 1;
-            const rankColor = rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-700' : 'text-gray-600';
-            const card = document.createElement('div');
-            card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01]`;
-            
-            card.innerHTML = `
+            leaderboard.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+            list.innerHTML = '';
+
+            leaderboard.slice(0, 10).forEach((user, index) => {
+                const rank = index + 1;
+                const rankColor = rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-700' : 'text-gray-600';
+                const card = document.createElement('div');
+                card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01]`;
+
+                card.innerHTML = `
                 <div class="flex items-center space-x-3">
                     <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
                     <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" alt="Profile">
@@ -1186,40 +1407,42 @@
                 </div>
                 <span class="text-2xl font-bold text-violet-600">${user.score || 0}</span>
             `;
-            list.appendChild(card);
-        });
-    };
+                list.appendChild(card);
+            });
+        };
 
-    const renderHistory = async () => {
-        const list = document.getElementById('history-list');
-        list.innerHTML = `<p class="text-center text-gray-500">${L('history-loading')}</p>`;
+        const renderHistory = async () => {
+            const list = document.getElementById('history-list');
+            list.innerHTML = `<p class="text-center text-gray-500">${L('history-loading')}</p>`;
 
-        const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history`);
-        const snapshot = await get(historyRef);
-        
-        if (!snapshot.exists()) {
-            list.innerHTML = `<p class="text-center text-gray-500">No history available.</p>`;
-            return;
-        }
+            const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history`);
+            const snapshot = await get(historyRef);
 
-        const historyData = snapshot.val();
-        let historyList = [];
-        for (const key in historyData) {
-            historyList.push(historyData[key]);
-        }
+            if (!snapshot.exists()) {
+                list.innerHTML = `<p class="text-center text-gray-500">No history available.</p>`;
+                return;
+            }
 
-        // Sort by time descending
-        historyList.sort((a, b) => b.startTime - a.startTime);
-        
-        list.innerHTML = '';
+            const historyData = snapshot.val();
+            let historyList = [];
+            for (const key in historyData) {
+                historyList.push(historyData[key]);
+            }
 
-        historyList.forEach(session => {
-            const date = new Date(session.startTime).toLocaleDateString(currentLanguage === 'mr' ? 'mr-IN' : currentLanguage === 'hi' ? 'hi-IN' : 'en-US');
-            const colorClass = session.score > 0 ? 'bg-emerald-50' : 'bg-red-50';
-            const card = document.createElement('div');
-            card.className = `p-4 ${colorClass} rounded-xl shadow-lg space-y-2 border-l-4 border-violet-500`;
-            
-            card.innerHTML = `
+            historyList.sort((a, b) => b.startTime - a.startTime);
+
+            list.innerHTML = '';
+
+            historyList.forEach(session => {
+                const date = new Date(session.startTime).toLocaleDateString(currentLanguage === 'mr' ? 'mr-IN' : currentLanguage === 'hi' ? 'hi-IN' : 'en-US');
+                const colorClass = session.correctCount > (session.questions.length / 2) ? 'bg-emerald-50' : 'bg-red-50';
+                const card = document.createElement('div');
+                card.className = `p-4 ${colorClass} rounded-xl shadow-lg space-y-2 border-l-4 border-violet-500 cursor-pointer transition duration-200 hover:shadow-xl`;
+
+                // FIX: Add click handler to review the history session
+                card.onclick = () => reviewHistoricalQuiz(session);
+
+                card.innerHTML = `
                 <div class="flex justify-between items-center">
                     <p class="text-lg font-bold text-gray-800">${session.subject} (${session.difficulty.toUpperCase()})</p>
                     <span class="text-sm text-gray-500">${date}</span>
@@ -1229,90 +1452,81 @@
                     <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${session.questions.length}</span>
                 </div>
             `;
-            list.appendChild(card);
-        });
-    };
-
-    // --- GLOBAL MODAL SYSTEM (REPLACES alert/confirm) ---
-
-    const showModal = (title, message, isConfirm = false, onConfirm = () => {}) => {
-        const modal = document.getElementById('global-modal');
-        document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-message').textContent = message;
-        
-        const confirmBtn = document.getElementById('modal-confirm-btn');
-        const cancelBtn = document.getElementById('modal-cancel-btn');
-
-        if (isConfirm) {
-            confirmBtn.classList.remove('hidden');
-            cancelBtn.classList.remove('hidden');
-        } else {
-            confirmBtn.classList.add('hidden');
-            cancelBtn.classList.remove('hidden');
-            // Change cancel button to 'Close' for alert mode
-            cancelBtn.textContent = 'Close';
-        }
-
-        // Clear previous listeners
-        confirmBtn.onclick = null;
-        cancelBtn.onclick = null;
-        
-        // Setup new listeners
-        confirmBtn.onclick = () => {
-            modal.classList.add('hidden');
-            onConfirm();
-            cancelBtn.textContent = 'Cancel'; // Reset button text
-        };
-        cancelBtn.onclick = () => {
-            modal.classList.add('hidden');
-            cancelBtn.textContent = 'Cancel'; // Reset button text
-        };
-
-        modal.classList.remove('hidden');
-    };
-    
-    // --- INITIALIZATION AND EVENT LISTENERS ---
-
-    window.initApp = () => {
-        // 1. Initial Language Check
-        const savedLang = localStorage.getItem('smartkid_lang');
-        if (savedLang) {
-            currentLanguage = savedLang;
-        }
-        document.getElementById('lang-select').value = currentLanguage;
-        localizeElements();
-
-        // 2. Set up main event listeners
-        document.getElementById('google-sign-in-btn').addEventListener('click', signInWithGoogle);
-        document.getElementById('profile-setup-form').addEventListener('submit', saveProfile);
-        document.getElementById('quiz-next-btn').addEventListener('click', nextQuestion);
-        document.getElementById('back-to-dashboard-btn').addEventListener('click', () => renderView('dashboard'));
-        document.getElementById('review-answers-btn').addEventListener('click', () => renderView('review'));
-        document.getElementById('close-review-btn').addEventListener('click', () => renderView('result'));
-        document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-
-        document.getElementById('lang-select').addEventListener('change', (e) => {
-            currentLanguage = e.target.value;
-            localStorage.setItem('smartkid_lang', currentLanguage);
-            localizeElements();
-        });
-
-        // 3. Bottom Navigation
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const view = btn.getAttribute('data-view');
-                renderView(view);
+                list.appendChild(card);
             });
-        });
+        };
 
-        // 4. Initial View Load (handled by onAuthStateChanged, falls back to 'login')
-        if (!currentUser) {
-            renderView('login');
-        }
-    };
-    
-    // Ensure the app initializes once Firebase Auth is ready (handled in the module import above)
+        // --- GLOBAL MODAL SYSTEM (REPLACES alert/confirm) ---
 
-</script>
+        const showModal = (title, message, isConfirm = false, onConfirm = () => { }) => {
+            const modal = document.getElementById('global-modal');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+
+            if (isConfirm) {
+                confirmBtn.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+            } else {
+                confirmBtn.classList.add('hidden');
+                cancelBtn.classList.remove('hidden');
+                cancelBtn.textContent = 'Close';
+            }
+
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+
+            confirmBtn.onclick = () => {
+                modal.classList.add('hidden');
+                onConfirm();
+                cancelBtn.textContent = 'Cancel';
+            };
+            cancelBtn.onclick = () => {
+                modal.classList.add('hidden');
+                cancelBtn.textContent = 'Cancel';
+            };
+
+            modal.classList.remove('hidden');
+        };
+
+        // --- INITIALIZATION AND EVENT LISTENERS ---
+
+        window.initApp = () => {
+            const savedLang = localStorage.getItem('smartkid_lang');
+            if (savedLang) {
+                currentLanguage = savedLang;
+            }
+            document.getElementById('lang-select').value = currentLanguage;
+            localizeElements();
+
+            document.getElementById('google-sign-in-btn').addEventListener('click', signInWithGoogle);
+            document.getElementById('profile-setup-form').addEventListener('submit', saveProfile);
+            document.getElementById('quiz-next-btn').addEventListener('click', nextQuestion);
+            document.getElementById('back-to-dashboard-btn').addEventListener('click', () => renderView('dashboard'));
+            document.getElementById('review-answers-btn').addEventListener('click', () => reviewHistoricalQuiz(quizSession)); // Pass current quizSession for review
+            document.getElementById('close-review-btn').addEventListener('click', () => renderView('result')); // Default close goes back to result view
+            document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
+
+            document.getElementById('lang-select').addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                localStorage.setItem('smartkid_lang', currentLanguage);
+                localizeElements();
+            });
+
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const view = btn.getAttribute('data-view');
+                    renderView(view);
+                });
+            });
+
+            if (!currentUser) {
+                renderView('login');
+            }
+        };
+    </script>
 </body>
+
 </html>
