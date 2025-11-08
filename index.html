@@ -25,6 +25,7 @@
         window.update = update;
 
         // --- USER-PROVIDED CONFIG (PLACEHOLDERS) ---
+        // Configuration provided by the user
         const firebaseConfig = {
             apiKey: "AIzaSyCaJX0lmumC-6J-iTHVB_PRe50Ww8oWp_g",
             authDomain: "smart-kid-balgram.firebaseapp.com",
@@ -36,6 +37,7 @@
             measurementId: "G-W402LPG44J"
         };
 
+        // Use environment variables if available, otherwise use defaults
         window.initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smart-kid-app';
 
@@ -55,6 +57,7 @@
                     await checkOrCreateUserProfile(user);
                 } else {
                     try {
+                        // Try to sign in with custom token if provided
                         if (window.initialAuthToken) {
                             await signInWithCustomToken(window.auth, window.initialAuthToken);
                         }
@@ -63,9 +66,11 @@
                     }
                 }
 
+                // Hide splash, show app
                 if (splash) splash.classList.add('hidden');
                 if (mainApp) mainApp.classList.remove('hidden');
 
+                // Call the main app initialization function
                 if (typeof window.initApp === 'function') {
                     window.initApp();
                 }
@@ -104,11 +109,17 @@
         /* Desktop Optimization: Center and constrain content to mobile size */
         @media (min-width: 768px) {
             .mobile-frame {
+                /* Use vh for viewport height, but manage app scrolling internally */
                 max-width: 420px;
-                height: 95vh;
-                margin: 0 auto;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                /* Max width of a typical phone */
+                max-height: 90vh;
+                /* Limit height on desktop */
+                margin: auto;
                 border-radius: 1.5rem;
+                /* Rounded corners for the "phone" */
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 8px solid #374151;
+                /* Dark border to simulate phone */
             }
 
             .body-container {
@@ -116,6 +127,8 @@
                 align-items: center;
                 justify-content: center;
                 min-height: 100vh;
+                padding: 2rem;
+                /* Add padding around the frame */
             }
         }
 
@@ -128,7 +141,7 @@
         #quiz-result-view {
             min-height: 80vh;
             padding-top: 2rem;
-            /* Removed display: flex to prevent override issues */
+            /* Removed display: flex to prevent override issues (Tailwind handles this) */
             flex-direction: column;
             justify-content: center;
         }
@@ -201,10 +214,11 @@
     </style>
 </head>
 
-<body class="body-container p-0 md:p-10 min-h-screen bg-gray-100">
+<body class="body-container p-0 min-h-screen bg-gray-100">
 
     <div class="mobile-frame">
 
+        <!-- Splash screen for loading -->
         <div id="splash"
             class="absolute inset-0 flex flex-col items-center justify-center bg-violet-700 z-50 transition-opacity duration-500">
             <div class="text-4xl font-extrabold text-white animate-pulse">Smart Kid</div>
@@ -212,8 +226,10 @@
             <div class="loader mt-4"></div>
         </div>
 
+        <!-- Main App Container -->
         <div id="main-app-container" class="h-full flex flex-col hidden">
 
+            <!-- Reusable Header Bar -->
             <header id="header-bar" class="p-4 bg-white shadow-md flex justify-between items-center z-10 sticky top-0">
                 <div class="flex items-center space-x-3">
                     <button id="header-back-btn"
@@ -238,8 +254,10 @@
                 </div>
             </header>
 
+            <!-- Main scrolling content area -->
             <main id="content-area" class="flex-grow overflow-y-auto p-4 pb-20">
 
+                <!-- Login View -->
                 <section id="login-view"
                     class="h-full flex flex-col items-center justify-center text-center space-y-8 hidden">
                     <h2 id="login-welcome" class="text-3xl font-extrabold text-violet-700"></h2>
@@ -265,6 +283,7 @@
                     </button>
                 </section>
 
+                <!-- Profile Setup View -->
                 <section id="profile-setup-view" class="p-6 bg-white rounded-xl shadow-2xl space-y-6 hidden">
                     <h2 id="setup-title" class="text-2xl font-extrabold text-violet-700 text-center">प्रोफाइल सेटअप</h2>
                     <p id="setup-tagline" class="text-gray-600 text-center"></p>
@@ -307,6 +326,7 @@
                     </form>
                 </section>
 
+                <!-- Dashboard View -->
                 <section id="dashboard-view" class="space-y-6 hidden">
                     <div
                         class="p-6 bg-violet-600 text-white rounded-2xl shadow-xl flex items-center justify-between mb-4">
@@ -320,6 +340,7 @@
                             alt="Profile Picture">
                     </div>
 
+                    <!-- Language Toggle -->
                     <div id="language-toggle" class="relative text-center mb-6">
                         <label class="text-gray-700 font-semibold text-sm mr-2">Change Language:</label>
                         <select id="lang-select"
@@ -330,6 +351,7 @@
                         </select>
                     </div>
 
+                    <!-- Weekly Test Card -->
                     <div id="weekly-test-card"
                         class="p-4 bg-yellow-400 rounded-2xl shadow-lg border-4 border-yellow-600 transform transition duration-300 hover:scale-[1.02] cursor-pointer hidden">
                         <div class="flex items-center justify-between">
@@ -345,20 +367,25 @@
                         </div>
                     </div>
 
+                    <!-- Subject Grid -->
                     <h3 id="subjects-heading"
                         class="text-2xl font-extrabold text-gray-800 text-center pt-4 border-b-2 border-gray-200 pb-2">
                     </h3>
                     <div id="subject-grid-map" class="grid grid-cols-2 gap-4">
+                        <!-- Subject cards will be injected here -->
                     </div>
                 </section>
 
+                <!-- Stage Selection View -->
                 <section id="stage-selection-view" class="space-y-6 hidden">
                     <h2 id="stage-selection-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
                     <p id="stage-selection-subtitle" class="text-center text-gray-600"></p>
                     <div id="stage-list" class="flex flex-col space-y-4">
+                        <!-- Difficulty stages will be injected here -->
                     </div>
                 </section>
 
+                <!-- Quiz View -->
                 <section id="quiz-view" class="space-y-4 hidden">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-200">
                         <div id="quiz-status" class="text-lg font-semibold text-violet-600"></div>
@@ -374,6 +401,7 @@
                     </div>
 
                     <div id="quiz-options-container" class="space-y-3">
+                        <!-- Options will be injected here -->
                     </div>
 
                     <div class="flex justify-end pt-4">
@@ -385,6 +413,7 @@
                     </div>
                 </section>
 
+                <!-- Quiz Result View -->
                 <section id="quiz-result-view"
                     class="h-full flex flex-col items-center justify-center text-center space-y-6 hidden">
                     <h2 id="result-title" class="text-4xl font-extrabold text-violet-700"></h2>
@@ -408,9 +437,11 @@
                     </div>
                 </section>
 
+                <!-- Review Answers View -->
                 <section id="review-view" class="space-y-6 hidden">
                     <h2 id="review-title" class="text-3xl font-extrabold text-violet-700 border-b pb-2"></h2>
                     <div id="review-list" class="space-y-6">
+                        <!-- Review cards will be injected here -->
                     </div>
                     <button id="close-review-btn"
                         class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
@@ -418,6 +449,7 @@
                     </button>
                 </section>
 
+                <!-- Profile View -->
                 <section id="profile-view" class="space-y-6 hidden">
                     <h2 id="profile-page-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
                     <div class="p-6 bg-white rounded-xl shadow-2xl space-y-4">
@@ -440,6 +472,7 @@
                     </button>
                 </section>
 
+                <!-- Leaderboard View -->
                 <section id="leaderboard-view" class="space-y-4 hidden">
                     <h2 id="leaderboard-title" class="text-3xl font-extrabold text-violet-700 border-b pb-2"></h2>
                     <div id="leaderboard-list" class="space-y-3">
@@ -447,6 +480,7 @@
                     </div>
                 </section>
 
+                <!-- History View -->
                 <section id="history-view" class="space-y-4 hidden">
                     <h2 id="history-title" class="text-3xl font-extrabold text-violet-700 border-b pb-2"></h2>
                     <div id="history-list" class="space-y-3">
@@ -454,8 +488,9 @@
                     </div>
                 </section>
 
+                <!-- Global Modal -->
                 <div id="global-modal"
-                    class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50">
+                    class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
                     <div
                         class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full transform transition-all scale-100 ease-out duration-300">
                         <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
@@ -471,8 +506,10 @@
 
             </main>
 
+            <!-- Bottom Navigation Bar -->
             <nav id="bottom-nav"
-                class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white border-t border-gray-200 shadow-2xl flex justify-around items-center h-16 z-20">
+                class="fixed bottom-0 left-0 right-0 md:relative md:max-w-none md:rounded-b-2xl bg-white border-t border-gray-200 shadow-2xl flex justify-around items-center h-16 z-20">
+                <!-- Use md:relative to stick to frame on desktop -->
                 <button data-view="dashboard"
                     class="nav-item flex flex-col items-center p-2 text-violet-500 font-medium transition duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -519,7 +556,7 @@
         const API_URL_TRIVIA = 'https://opentdb.com/api.php';
 
         let currentView = 'dashboard';
-        let viewHistory = []; // NEW: Store history for back navigation
+        let viewHistory = []; // Store history for back navigation
         let currentUser = null;
         let userProfile = null;
         let quizSession = null; // Holds current or last completed quiz session data
@@ -609,13 +646,11 @@
         // Simple text simulation for localization (Open Trivia is English-only)
         const simulateTranslation = (text) => {
             if (currentLanguage === 'en') return text;
-
-            // In a real app, this would be an API call (e.g., Google Translate) or database lookup.
             const baseText = text.length > 50 ? text.substring(0, 50) + '...' : text;
             if (currentLanguage === 'mr') {
-                return `(मराठी अनुवाद) ${baseText}`;
+                return `${baseText}`;
             } else if (currentLanguage === 'hi') {
-                return `(हिन्दी अनुवाद) ${baseText}`;
+                return `${baseText}`;
             }
             return text;
         };
@@ -646,11 +681,13 @@
             if (userProfile) {
                 document.getElementById('welcome-greeting').textContent = L('welcome-greeting');
                 updateProfileUI();
-                if (currentView === 'result') renderResultView();
-                if (currentView === 'review') renderReviewView();
+
+                // --- FIX 2: Corrected 'result' to 'quiz-result' ---
+                if (currentView === 'quiz-result' && quizSession) renderResultView();
+                if (currentView === 'review' && quizSession) renderReviewView();
+                if (currentView === 'dashboard') renderDashboard();
             }
         };
-
         // Tone.js Sound System
         const synth = new Tone.PolySynth(Tone.Synth, {
             oscillator: { type: "sine" },
@@ -675,11 +712,12 @@
             }
         };
 
+        // Fetch with exponential backoff for rate limiting
         const backoffFetch = async (url, options, maxRetries = 3) => {
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const response = await fetch(url, options);
-                    if (response.status === 429) {
+                    if (response.status === 429) { // Too Many Requests
                         throw new Error("Rate limit exceeded");
                     }
                     if (!response.ok) {
@@ -688,7 +726,7 @@
                     return response.json();
                 } catch (error) {
                     if (i === maxRetries - 1) throw error;
-                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000; // 1s, 2s, 4s + jitter
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
@@ -698,7 +736,7 @@
 
         const signInWithGoogle = async () => {
             try {
-                await Tone.start();
+                await Tone.start(); // Start audio context on user interaction
                 await window.signInWithPopup(window.auth, window.googleProvider);
             } catch (error) {
                 console.error("Google Sign-In Error:", error);
@@ -711,7 +749,7 @@
         const signOutUser = async () => {
             try {
                 await window.signOut(window.auth);
-                location.reload();
+                location.reload(); // Easiest way to reset state
             } catch (error) {
                 console.error("Sign Out Error:", error);
             }
@@ -728,6 +766,7 @@
                     await update(userRef, { isTestPaid: false });
                 }
                 if (!userProfile.standard || !userProfile.medium) {
+                    currentUser = user;
                     renderView('profile-setup');
                 } else {
                     currentUser = user;
@@ -766,7 +805,6 @@
             await set(profileRef, newProfile);
             userProfile = newProfile;
             isTestPaid = userProfile.isTestPaid;
-            // When setting up a profile, go to the dashboard without history
             viewHistory = [];
             renderView('dashboard');
         };
@@ -790,14 +828,24 @@
         };
 
         const saveQuizHistory = async (session) => {
-            const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history/${Date.now()}`);
-            await set(historyRef, session);
+            if (!window.userId) {
+                console.error("saveQuizHistory: No user ID. Cannot save.");
+                return;
+            }
+            try {
+                const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history/${Date.now()}`);
+                await set(historyRef, session);
 
-            const newScore = (userProfile.score || 0) + session.score;
-            const userScoreRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
-            await update(userScoreRef, { score: newScore });
-            userProfile.score = newScore;
-            updateProfileUI();
+                const newScore = (userProfile.score || 0) + session.score;
+                const userScoreRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
+                await update(userScoreRef, { score: newScore });
+
+                userProfile.score = newScore;
+                updateProfileUI();
+            } catch (error) {
+                console.error("Firebase saveQuizHistory Error:", error);
+                showModal('Save Error', 'Could not save your quiz result. Please check your internet connection.', false);
+            }
         };
 
         // --- OPEN TRIVIA API & TRANSLATION LOGIC ---
@@ -812,31 +860,25 @@
         const fetchQuizQuestions = async (subject, difficulty, count = 10) => {
             const categoryId = TRIVIA_CATEGORIES[subject] || 9;
             const diffParam = difficulty === 'hard' ? 'hard' : difficulty === 'medium' ? 'medium' : 'easy';
-
             const url = `${API_URL_TRIVIA}?amount=${count}&category=${categoryId}&difficulty=${diffParam}&type=multiple`;
 
             const questionContainer = document.getElementById('quiz-question-text');
             const optionsContainer = document.getElementById('quiz-options-container');
 
-            questionContainer.innerHTML = `<div class="flex items-center justify-center space-x-2"><div class="loader border-violet-500"></div><p class="text-gray-500">${L('question-loading')}</p></div>`;
+            questionContainer.innerHTML = `<div class="flex items-center justify-center space-x-2"><div class="loader" style="border-top-color: var(--primary);"></div><p class="text-gray-500">${L('question-loading')}</p></div>`;
             optionsContainer.innerHTML = '';
             document.getElementById('quiz-translation-note').classList.add('hidden');
 
-
             try {
                 const responseData = await backoffFetch(url);
-
                 if (responseData.response_code !== 0) {
                     throw new Error(`Trivia API Error Code: ${responseData.response_code}`);
                 }
-
                 const questions = responseData.results.map(q => {
                     const incorrect = q.incorrect_answers.map(decodeHtml);
                     const correct = decodeHtml(q.correct_answer);
-
                     const allOptions = [...incorrect, correct];
                     shuffleArray(allOptions);
-
                     const correctIndex = allOptions.findIndex(opt => opt === correct);
 
                     let scoreValue = 0;
@@ -844,7 +886,6 @@
                     else if (q.difficulty === 'medium') scoreValue = 20;
                     else scoreValue = 10;
 
-                    // SIMULATED TRANSLATION: Store English, then translate for other languages
                     const q_en = decodeHtml(q.question);
                     const expl_en = `The correct answer is "${correct}" (Topic: ${q.category}).`;
                     const opts_en = allOptions;
@@ -865,9 +906,7 @@
                         scoreValue: scoreValue
                     };
                 });
-
                 return questions;
-
             } catch (error) {
                 console.error("Trivia API Fetch Error:", error);
                 questionContainer.textContent = L('question-generating-error');
@@ -881,13 +920,10 @@
 
         const startQuiz = async (subject, difficulty, isTest = false) => {
             const questionData = await fetchQuizQuestions(subject, difficulty, isTest ? 15 : 10);
-
             if (!questionData || questionData.length === 0) {
-                // If loading fails, automatically go back to the selection screen
                 goBack();
                 return;
             }
-
             quizSession = {
                 subject: subject,
                 difficulty: difficulty,
@@ -899,24 +935,20 @@
                 startTime: Date.now(),
                 duration: 0,
             };
-
-            // Before rendering the quiz, ensure the stage selection view is in history
             if (currentView !== 'stage-selection') {
                 viewHistory.push('stage-selection');
             }
-
             renderView('quiz');
             renderQuestion();
             startQuizTimer();
-            playSound('next');
         };
 
         let quizTimerInterval = null;
         const startQuizTimer = () => {
             const timerElement = document.getElementById('quiz-timer');
             let totalSeconds = 0;
-
             clearInterval(quizTimerInterval);
+            timerElement.textContent = '00:00';
             quizTimerInterval = setInterval(() => {
                 totalSeconds++;
                 const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
@@ -929,7 +961,9 @@
             clearInterval(quizTimerInterval);
             const timerText = document.getElementById('quiz-timer').textContent;
             const parts = timerText.split(':').map(Number);
-            quizSession.duration = parts[0] * 60 + parts[1];
+            if (quizSession) {
+                quizSession.duration = parts[0] * 60 + parts[1];
+            }
         };
 
         const renderQuestion = () => {
@@ -950,7 +984,6 @@
             document.getElementById('quiz-next-btn').classList.add('hidden');
             document.getElementById('quiz-next-btn').disabled = true;
 
-            // Show translation note if language is not English
             if (currentLanguage !== 'en' && !quizSession.isTest) {
                 document.getElementById('quiz-translation-note').classList.remove('hidden');
             } else {
@@ -972,7 +1005,7 @@
         };
 
         const selectOption = (selectedIndex) => {
-            if (!quizSession || quizSession.questions[quizSession.currentQIndex].userAnswer !== -1) return; // Prevent double clicking
+            if (!quizSession || quizSession.questions[quizSession.currentQIndex].userAnswer !== -1) return;
 
             const q = quizSession.questions[quizSession.currentQIndex];
             const isCorrect = selectedIndex === q.correct_answer_index;
@@ -985,9 +1018,7 @@
             const optionButtons = document.querySelectorAll('#quiz-options-container .option-btn');
             optionButtons.forEach(btn => {
                 const index = parseInt(btn.dataset.index);
-
                 btn.classList.remove('hover:border-violet-500', 'hover:shadow-xl');
-
                 if (index === q.correct_answer_index) {
                     btn.classList.add('bg-emerald-100', 'border-emerald-500', 'correct-animation');
                 } else if (index === selectedIndex) {
@@ -1009,31 +1040,33 @@
             document.getElementById('quiz-next-btn').disabled = false;
         };
 
-        const nextQuestion = () => {
+        const nextQuestion = async () => {
             if (!quizSession) return;
-
             if (quizSession.currentQIndex < quizSession.questions.length - 1) {
                 quizSession.currentQIndex++;
                 renderQuestion();
             } else {
                 stopQuizTimer();
-                endQuiz();
+                await endQuiz();
             }
         };
 
-        // FIX: Ensure result view logic is explicitly called after quiz ends
-        const endQuiz = () => {
+        // --- FIX 1: Corrected 'result' to 'quiz-result' ---
+        const endQuiz = async () => {
             playSound('level_up');
-            // IMPORTANT: Save the history and then immediately update the UI
-            saveQuizHistory(quizSession);
-            renderView('result');
+            await saveQuizHistory(quizSession);
+            renderView('quiz-result'); // Corrected view name
+            renderResultView();
         };
 
         const renderResultView = () => {
-            // FIX: Guard against missing quiz session
             if (!quizSession || !quizSession.questions) {
-                // If the session is somehow lost, redirect back
-                renderView('dashboard');
+                console.error("renderResultView called, but quizSession is empty.");
+                // Show a minimal error on the result page itself, don't redirect
+                const titleElement = document.getElementById('result-title');
+                if (titleElement) titleElement.textContent = "Error";
+                const taglineElement = document.getElementById('result-tagline');
+                if (taglineElement) taglineElement.textContent = "Could not load quiz data.";
                 return;
             }
 
@@ -1052,8 +1085,8 @@
 
             if (correctQ / totalQ > 0.7) {
                 titleElement.textContent = L('result-title-success');
-                scoreRing.classList.add('border-success', 'bg-green-100');
-                scoreElement.classList.add('text-success');
+                scoreRing.classList.add('border-emerald-500', 'bg-green-100');
+                scoreElement.classList.add('text-emerald-500');
             } else {
                 titleElement.textContent = L('result-title-fail');
                 scoreRing.classList.add('border-red-500', 'bg-red-100');
@@ -1068,12 +1101,11 @@
                 .replace('{correct}', correctQ);
         };
 
+        // --- FIX 5: Corrected 'result' to 'quiz-result' ---
         const openReviewScreen = (session, sourceView) => {
-            // Store the current view for the back button
             if (currentView !== 'review') {
                 viewHistory.push(currentView);
             }
-
             quizSession = session;
             renderView('review');
 
@@ -1081,25 +1113,22 @@
                 document.getElementById('close-review-btn').onclick = () => renderView('history');
                 document.getElementById('close-review-text').textContent = L('back-to-history-text');
             } else {
-                document.getElementById('close-review-btn').onclick = () => renderView('result');
+                document.getElementById('close-review-btn').onclick = () => renderView('quiz-result'); // Corrected view name
                 document.getElementById('close-review-text').textContent = L('close-review-text');
             }
         };
 
         const renderReviewView = () => {
-            // FIX: Guard against missing quiz session data
             if (!quizSession || !quizSession.questions) {
                 renderView('dashboard');
                 return;
             }
-
             const reviewList = document.getElementById('review-list');
             reviewList.innerHTML = '';
             document.getElementById('review-title').textContent = `${L('review-btn-text')} - ${quizSession.subject}`;
 
             quizSession.questions.forEach((q, index) => {
                 const isCorrect = q.userAnswer === q.correct_answer_index;
-
                 const questionKey = `question_${currentLanguage}`;
                 const explanationKey = `explanation_${currentLanguage}`;
                 const optionsKey = `options_${currentLanguage}`;
@@ -1110,28 +1139,24 @@
 
                 const card = document.createElement('div');
                 card.className = `p-4 rounded-xl shadow-lg border-l-4 ${isCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-red-500 bg-red-50'} space-y-3`;
-
                 let html = `<p class="font-bold text-lg">${index + 1}. ${qText}</p>`;
 
                 options.forEach((opt, optIndex) => {
                     const isUser = optIndex === q.userAnswer;
                     const isCorrectOption = optIndex === q.correct_answer_index;
                     let colorClass = 'text-gray-700';
-
                     if (isCorrectOption) {
                         colorClass = 'font-bold text-emerald-600';
                     } else if (isUser && !isCorrect) {
                         colorClass = 'font-bold text-red-600 line-through';
                     }
-
                     html += `<p class="ml-4 text-sm ${colorClass}">${String.fromCharCode(65 + optIndex)}. ${opt} ${isCorrectOption ? ' (Correct Answer)' : ''} ${isUser && !isCorrect ? ' (Your Answer)' : ''}</p>`;
                 });
 
                 html += `<div class="mt-3 p-3 bg-white rounded-lg border border-gray-200">
                                    <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
                                    <p class="text-sm text-gray-800">${explanationText}</p>
-                                  </div>`;
-
+                                 </div>`;
                 card.innerHTML = html;
                 reviewList.appendChild(card);
             });
@@ -1141,32 +1166,25 @@
         // --- UI/VIEW MANAGEMENT & BACK LOGIC ---
 
         const hideAllViews = () => {
-            // Explicitly hide all sections
             document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
-
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.replace('text-violet-500', 'text-gray-500'));
             document.getElementById('quiz-timer').classList.add('hidden');
-            document.getElementById('header-title').textContent = ''; // Clear header title
+            document.getElementById('header-title').textContent = '';
         };
 
         const renderView = (viewName) => {
-            if (!currentUser && viewName !== 'login') {
+            if (!currentUser && viewName !== 'login' && viewName !== 'profile-setup') {
                 viewName = 'login';
             }
-
-            // Navigation Logic: Only save navigations that aren't back-actions or repeated navigation
-            if (viewName !== currentView && !['result', 'review', 'login', 'profile-setup'].includes(currentView)) {
+            if (viewName !== currentView && !['quiz-result', 'review', 'login', 'profile-setup'].includes(currentView)) {
                 if (viewHistory.length === 0 || viewHistory[viewHistory.length - 1] !== currentView) {
                     viewHistory.push(currentView);
                 }
             } else if (viewName === currentView) {
-                // If rendering the same view, clear the history, e.g., refreshing dashboard
                 if (['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName)) {
                     viewHistory = [];
                 }
             }
-
-            // Handle specific navigation path cleanup that bypasses history
             if (viewName === 'dashboard' || viewName === 'login' || viewName === 'profile-setup') {
                 viewHistory = [];
             }
@@ -1180,7 +1198,6 @@
             const activeNavBtn = document.querySelector(`.nav-item[data-view="${viewName}"]`);
             if (activeNavBtn) activeNavBtn.classList.replace('text-gray-500', 'text-violet-500');
 
-            // Bottom Nav Visibility
             const showNav = ['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName);
             const bottomNav = document.getElementById('bottom-nav');
             if (showNav) {
@@ -1189,24 +1206,25 @@
                 bottomNav.classList.add('hidden');
             }
 
-            // Header Back Button Visibility
             const backBtn = document.getElementById('header-back-btn');
-            const showBackBtn = ['stage-selection', 'quiz', 'result', 'review'].includes(viewName);
+            // --- FIX 4: Corrected 'result' to 'quiz-result' ---
+            const showBackBtn = ['stage-selection', 'quiz', 'quiz-result', 'review'].includes(viewName);
             if (showBackBtn) {
                 backBtn.classList.remove('hidden');
             } else {
                 backBtn.classList.add('hidden');
             }
 
+            // --- View-Specific Logic ---
             switch (viewName) {
                 case 'dashboard':
                     document.getElementById('header-title').textContent = 'Smart Kid';
-                    quizSession = null;
                     renderDashboard();
                     break;
-                case 'result':
+                // --- FIX 3: Corrected 'result' to 'quiz-result' ---
+                case 'quiz-result':
                     document.getElementById('header-title').textContent = 'Quiz Result';
-                    renderResultView();
+                    // renderResultView() is now called by endQuiz()
                     break;
                 case 'leaderboard':
                     document.getElementById('header-title').textContent = L('leaderboard-title');
@@ -1234,25 +1252,31 @@
             console.log("Current View:", currentView, "History:", viewHistory);
         };
 
+        // --- FIX 4: Corrected 'result' to 'quiz-result' ---
         const goBack = () => {
-            let previousView = viewHistory.pop();
-
-            if (previousView) {
-                // Special handling for paths that jump between views:
-                if (previousView === 'stage-selection') {
-                    // Back from stage-selection should go to dashboard, clearing history
-                    renderView('dashboard');
-                } else if (previousView === 'quiz' && currentView === 'result') {
-                    // This scenario shouldn't happen if quiz is successfully completed. If it does, go to dashboard.
-                    renderView('dashboard');
-                } else if (previousView === 'result' && currentView === 'review') {
-                    // Back from review (result source) goes back to result
-                    renderView('result');
-                } else {
+            if (currentView === 'quiz-result' || currentView === 'quiz') {
+                quizSession = null;
+                renderView('dashboard');
+                return;
+            }
+            if (currentView === 'review') {
+                let previousView = viewHistory.pop();
+                if (previousView === 'quiz-result' || previousView === 'history') {
                     renderView(previousView);
+                } else {
+                    renderView('dashboard');
                 }
+                return;
+            }
+            if (currentView === 'stage-selection') {
+                viewHistory.pop();
+                renderView('dashboard');
+                return;
+            }
+            let previousView = viewHistory.pop();
+            if (previousView) {
+                renderView(previousView);
             } else {
-                // If history is empty, assume dashboard or login screen
                 if (currentUser) {
                     renderView('dashboard');
                 } else {
@@ -1261,41 +1285,34 @@
             }
         };
 
-
-        // --- SUBJECT FILTERING LOGIC (REST OF THE CODE) ---
-
+        // --- SUBJECT FILTERING LOGIC ---
         const getStandardSubjects = (standard) => {
+            if (!standard) return SUBJECTS_DATA;
             const std = parseInt(standard);
-            // Filter subjects based on the user's registered standard
             return SUBJECTS_DATA.filter(subject => subject.standards.includes(std));
         };
 
         // --- DASHBOARD RENDERING (GRID Layout) ---
-
         const renderDashboard = () => {
-            if (!userProfile) return; // Guard against incomplete profile
-
+            if (!userProfile) return;
             checkWeeklyTestStatus();
-
             const gridContainer = document.getElementById('subject-grid-map');
             gridContainer.innerHTML = '';
-
             const subjectsToShow = getStandardSubjects(userProfile.standard);
 
             subjectsToShow.forEach((subject) => {
                 const card = document.createElement('button');
                 card.className = `p-4 h-32 ${subject.color} text-white rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 font-bold transition duration-300 transform hover:scale-[1.03] stage-card`;
                 card.innerHTML = `
-                <span class="text-4xl">${subject.emoji}</span>
-                <span class="text-sm font-semibold text-center">${subject.name}</span>
-            `;
-                // Add dashboard view to history before going to selection
+                   <span class="text-4xl">${subject.emoji}</span>
+                   <span class="text-sm font-semibold text-center">${subject.name}</span>
+                 `;
                 card.onclick = () => renderDifficultySelection(subject.name);
                 gridContainer.appendChild(card);
             });
         };
 
-        // --- Difficulty Selection is unchanged and is loaded on subject click ---
+        // --- Difficulty Selection ---
         const renderDifficultySelection = (subject) => {
             renderView('stage-selection');
             const list = document.getElementById('stage-list');
@@ -1308,26 +1325,25 @@
                 const card = document.createElement('button');
                 card.className = `w-full p-5 ${diff.color} text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300 transform hover:scale-[1.03]`;
                 card.innerHTML = `
-                <div class="flex items-center space-x-4">
-                    <div class="text-3xl">${diff.emoji}</div>
-                    <div>
-                            <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
-                            <p class="font-semibold text-sm opacity-90">${subject}</p>
-                    </div>
-                </div>
-                <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Multiplier: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
-            `;
+                   <div class="flex items-center space-x-4">
+                       <div class="text-3xl">${diff.emoji}</div>
+                       <div>
+                               <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
+                               <p class="font-semibold text-sm opacity-90">${subject}</p>
+                       </div>
+                   </div>
+                   <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Score: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
+                 `;
                 card.onclick = () => startQuiz(subject, difficultyKey, false);
                 list.appendChild(card);
             });
         };
 
         // --- WEEKLY TEST LOGIC ---
-
         const checkWeeklyTestStatus = () => {
             const testCard = document.getElementById('weekly-test-card');
-            const isSunday = true; // Mocked for demo
-
+            if (!testCard) return;
+            const isSunday = true; // Mocked for demo (new Date().getDay() === 0)
             const isTestEnabledByAdmin = isSunday;
 
             testCard.classList.add('hidden');
@@ -1336,41 +1352,34 @@
 
             const cardBtn = document.getElementById('test-card-btn');
             document.getElementById('test-card-title').textContent = L('test-card-title');
-            testCard.classList.replace('bg-gray-400', 'bg-yellow-400');
-            testCard.classList.replace('border-gray-600', 'border-yellow-600');
-            document.getElementById('test-card-status').classList.remove('text-yellow-700', 'text-gray-700', 'text-red-700');
-
+            testCard.className = 'p-4 rounded-2xl shadow-lg border-4 transform transition duration-300 hover:scale-[1.02] cursor-pointer';
 
             if (isTestEnabledByAdmin) {
                 isWeeklyTestAvailable = true;
                 testCard.classList.remove('hidden');
-
+                testCard.classList.add('bg-yellow-400', 'border-yellow-600');
                 if (isTestPaid) {
                     document.getElementById('test-card-status').textContent = L('test-card-status-paid');
-                    document.getElementById('test-card-status').classList.add('text-yellow-700');
+                    document.getElementById('test-card-status').className = 'text-sm text-yellow-700';
                     cardBtn.textContent = L('test-card-btn-start');
                     testCard.onclick = () => startQuiz('Weekly Test (Premium)', 'hard', true);
                 } else {
                     document.getElementById('test-card-status').textContent = L('test-card-status-pay');
-                    document.getElementById('test-card-status').classList.add('text-red-700');
+                    document.getElementById('test-card-status').className = 'text-sm text-red-700 font-semibold';
                     cardBtn.textContent = L('test-card-btn-pay');
                     testCard.onclick = () => showPaymentModal();
                 }
             } else {
                 testCard.classList.remove('hidden');
-                testCard.classList.replace('bg-yellow-400', 'bg-gray-400');
-                testCard.classList.replace('border-yellow-600', 'border-gray-600');
+                testCard.classList.add('bg-gray-400', 'border-gray-600', 'cursor-not-allowed');
                 document.getElementById('test-card-status').textContent = L('test-card-status-inactive');
-                document.getElementById('test-card-status').classList.add('text-gray-700');
+                document.getElementById('test-card-status').className = 'text-sm text-gray-700';
                 cardBtn.textContent = 'CLOSED';
                 testCard.onclick = null;
             }
         };
 
         const showPaymentModal = () => {
-            // Save current view to history before modal pop-up
-            if (currentView !== 'dashboard') viewHistory.push(currentView);
-
             showModal(
                 L('modal-pay-title'),
                 L('modal-pay-message'),
@@ -1379,43 +1388,33 @@
                     const modal = document.getElementById('global-modal');
                     modal.classList.add('hidden');
                     showModal('Processing Payment...', 'Simulating transaction for ₹9.00 via Razorpay... Please wait.', false);
-
                     setTimeout(async () => {
                         const userRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
                         await update(userRef, { isTestPaid: true });
-
                         isTestPaid = true;
                         userProfile.isTestPaid = true;
-
                         document.getElementById('global-modal').classList.add('hidden');
                         showModal('Success! 🎉', 'Payment successful. All weekly tests are now unlocked permanently!', false);
-
                         checkWeeklyTestStatus();
                         updateProfileUI();
-                        // Go back to dashboard after payment success
                         renderView('dashboard');
                     }, 2000);
                 }
             );
         };
 
-        // --- LEADERBOARD & HISTORY RENDERING (REST OF THE CODE) ---
-
+        // --- LEADERBOARD & HISTORY RENDERING ---
         const renderLeaderboard = async () => {
             const list = document.getElementById('leaderboard-list');
             list.innerHTML = `<p class="text-center text-gray-500">${L('leaderboard-loading')}</p>`;
-
             const usersRef = ref(window.db, `artifacts/${window.appId}/users`);
             const snapshot = await get(usersRef);
-
             if (!snapshot.exists()) {
                 list.innerHTML = `<p class="text-center text-gray-500">No scores yet.</p>`;
                 return;
             }
-
             const userData = snapshot.val();
             let leaderboard = [];
-
             for (const uid in userData) {
                 if (userData[uid].profile) {
                     leaderboard.push({
@@ -1424,28 +1423,24 @@
                     });
                 }
             }
-
             leaderboard.sort((a, b) => (b.score || 0) - (a.score || 0));
-
             list.innerHTML = '';
-
             leaderboard.slice(0, 10).forEach((user, index) => {
                 const rank = index + 1;
                 const rankColor = rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-700' : 'text-gray-600';
                 const card = document.createElement('div');
                 card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01] border-b-2 ${user.isTestPaid ? 'border-yellow-400' : 'border-violet-200'}`;
-
                 card.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
-                    <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
-                    <div>
-                        <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${user.isTestPaid ? '⭐' : ''}</p>
-                        <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
-                    </div>
-                </div>
-                <span class="text-2xl font-bold text-violet-600">${user.score || 0}</span>
-            `;
+                   <div class="flex items-center space-x-3">
+                       <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
+                       <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
+                       <div>
+                           <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${user.isTestPaid ? '⭐' : ''}</p>
+                           <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
+                       </div>
+                   </div>
+                   <span class="text-2xl font-bold text-violet-600">${user.score || 0}</span>
+                 `;
                 list.appendChild(card);
             });
         };
@@ -1453,56 +1448,45 @@
         const renderHistory = async () => {
             const list = document.getElementById('history-list');
             list.innerHTML = `<p class="text-center text-gray-500">${L('history-loading')}</p>`;
-
             const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history`);
             const snapshot = await get(historyRef);
-
             if (!snapshot.exists()) {
                 list.innerHTML = `<p class="text-center text-gray-500">No history available.</p>`;
                 return;
             }
-
             const historyData = snapshot.val();
             let historyList = [];
             for (const key in historyData) {
                 historyList.push(historyData[key]);
             }
-
             historyList.sort((a, b) => b.startTime - a.startTime);
-
             list.innerHTML = '';
-
             historyList.forEach(session => {
                 const date = new Date(session.startTime).toLocaleDateString(currentLanguage === 'mr' ? 'mr-IN' : currentLanguage === 'hi' ? 'hi-IN' : 'en-US');
                 const colorClass = session.correctCount > (session.questions.length / 2) ? 'bg-emerald-50' : 'bg-red-50';
                 const statusEmoji = session.correctCount > (session.questions.length / 2) ? '🥳' : '✍️';
-
                 const card = document.createElement('div');
                 card.className = `p-4 ${colorClass} rounded-xl shadow-lg space-y-2 border-l-4 border-violet-500 cursor-pointer transition duration-200 hover:shadow-xl`;
-
                 card.onclick = () => openReviewScreen(session, 'history');
-
                 card.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <p class="text-lg font-bold text-gray-800">${session.subject} (${session.difficulty.toUpperCase()})</p>
-                    <span class="text-sm text-gray-500">${date}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="font-semibold text-violet-600">Score: ${session.score} ${statusEmoji}</span>
-                    <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${session.questions.length}</span>
-                </div>
-            `;
+                   <div class="flex justify-between items-center">
+                       <p class="text-lg font-bold text-gray-800">${session.subject} (${session.difficulty.toUpperCase()})</p>
+                       <span class="text-sm text-gray-500">${date}</span>
+                   </div>
+                   <div class="flex justify-between text-sm">
+                       <span class="font-semibold text-violet-600">Score: ${session.score} ${statusEmoji}</span>
+                       <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${session.questions.length}</span>
+                   </div>
+                 `;
                 list.appendChild(card);
             });
         };
 
-        // --- GLOBAL MODAL SYSTEM (REST OF THE CODE) ---
-
+        // --- GLOBAL MODAL SYSTEM ---
         const showModal = (title, message, isConfirm = false, onConfirm = () => { }) => {
             const modal = document.getElementById('global-modal');
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').innerHTML = message;
-
             const confirmBtn = document.getElementById('modal-confirm-btn');
             const cancelBtn = document.getElementById('modal-cancel-btn');
 
@@ -1518,10 +1502,8 @@
                 cancelBtn.classList.remove('hidden');
                 cancelBtn.textContent = 'Close';
             }
-
             confirmBtn.onclick = null;
             cancelBtn.onclick = null;
-
             confirmBtn.onclick = () => {
                 modal.classList.add('hidden');
                 onConfirm();
@@ -1533,12 +1515,10 @@
                 confirmBtn.classList.replace('bg-emerald-500', 'bg-violet-500');
                 confirmBtn.classList.replace('hover:bg-emerald-600', 'hover:bg-violet-600');
             };
-
             modal.classList.remove('hidden');
         };
 
         // --- INITIALIZATION AND EVENT LISTENERS ---
-
         window.initApp = () => {
             const savedLang = localStorage.getItem('smartkid_lang');
             if (savedLang) {
@@ -1550,40 +1530,31 @@
             document.getElementById('google-sign-in-btn').addEventListener('click', signInWithGoogle);
             document.getElementById('profile-setup-form').addEventListener('submit', saveProfile);
             document.getElementById('quiz-next-btn').addEventListener('click', nextQuestion);
-
-            // NEW: Back button handler
             document.getElementById('header-back-btn').addEventListener('click', goBack);
 
-            // Ensure 'Go to Dashboard' clears session and renders dashboard
             document.getElementById('back-to-dashboard-btn').addEventListener('click', () => {
                 quizSession = null;
-                // Use renderView('dashboard') directly, clearing history
                 renderView('dashboard');
             });
-
-            // Ensure 'Review Answers' button uses the currently active quizSession
             document.getElementById('review-answers-btn').addEventListener('click', () => {
                 if (quizSession) {
-                    openReviewScreen(quizSession, 'result');
+                    openReviewScreen(quizSession, 'quiz-result'); // Corrected source view
                 } else {
-                    renderView('dashboard'); // Fallback if session is lost
+                    renderView('dashboard');
                 }
             });
-
             document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-
             document.getElementById('lang-select').addEventListener('change', (e) => {
                 currentLanguage = e.target.value;
                 localStorage.setItem('smartkid_lang', currentLanguage);
                 localizeElements();
-                // Re-render the current view to apply new localization
-                renderView(currentView);
             });
-
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const view = btn.getAttribute('data-view');
-                    // Navigating via bottom bar always resets history and goes to the main view
+                    if (view === 'dashboard') {
+                        quizSession = null;
+                    }
                     viewHistory = [];
                     renderView(view);
                 });
