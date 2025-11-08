@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -129,7 +128,7 @@
         #quiz-result-view {
             min-height: 80vh;
             padding-top: 2rem;
-            display: flex;
+            /* Removed display: flex to prevent override issues */
             flex-direction: column;
             justify-content: center;
         }
@@ -216,7 +215,17 @@
         <div id="main-app-container" class="h-full flex flex-col hidden">
 
             <header id="header-bar" class="p-4 bg-white shadow-md flex justify-between items-center z-10 sticky top-0">
-                <h1 id="header-title" class="text-xl font-bold text-gray-800"></h1>
+                <div class="flex items-center space-x-3">
+                    <button id="header-back-btn"
+                        class="p-2 text-gray-500 hover:text-violet-500 rounded-full transition duration-150 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </button>
+                    <h1 id="header-title" class="text-xl font-bold text-gray-800"></h1>
+                </div>
                 <div class="flex items-center space-x-3">
                     <button id="notification-btn"
                         class="p-2 text-gray-500 hover:text-violet-500 rounded-full transition duration-150">
@@ -376,26 +385,28 @@
                     </div>
                 </section>
 
-                <section id="quiz-result-view" class="text-center space-y-6 hidden">
-    <h2 id="result-title" class="text-4xl font-extrabold text-violet-700"></h2>
-    <p id="result-tagline" class="text-xl text-gray-600"></p>
-    <div id="result-score-ring"
-        class="mx-auto w-32 h-32 flex items-center justify-center rounded-full border-8 border-success bg-green-100 shadow-xl">
-        <span id="result-score" class="text-4xl font-bold text-success"></span>
-    </div>
-    <p id="result-details" class="text-lg font-medium text-gray-700"></p>
-    <div class="flex flex-col space-y-4">
-        <button id="review-answers-btn"
-            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
-            <span id="review-btn-text">Review Answers</span>
-        </button>
-        <button id="back-to-dashboard-btn"
-            class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
-            <span id="dashboard-btn-text">Go to Dashboard</span>
-        </button>
-    </div>
-</section>
+                <section id="quiz-result-view"
+                    class="h-full flex flex-col items-center justify-center text-center space-y-6 hidden">
+                    <h2 id="result-title" class="text-4xl font-extrabold text-violet-700"></h2>
+                    <p id="result-tagline" class="text-xl text-gray-600"></p>
+                    <div id="result-score-ring"
+                        class="mx-auto w-32 h-32 flex items-center justify-center rounded-full border-8 border-success bg-green-100 shadow-xl">
+                        <span id="result-score" class="text-4xl font-bold text-success"></span>
+                    </div>
 
+                    <p id="result-details" class="text-lg font-medium text-gray-700"></p>
+
+                    <div class="flex flex-col space-y-4 w-full max-w-sm">
+                        <button id="review-answers-btn"
+                            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                            <span id="review-btn-text">Review Answers</span>
+                        </button>
+                        <button id="back-to-dashboard-btn"
+                            class="w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                            <span id="dashboard-btn-text">Go to Dashboard</span>
+                        </button>
+                    </div>
+                </section>
 
                 <section id="review-view" class="space-y-6 hidden">
                     <h2 id="review-title" class="text-3xl font-extrabold text-violet-700 border-b pb-2"></h2>
@@ -508,6 +519,7 @@
         const API_URL_TRIVIA = 'https://opentdb.com/api.php';
 
         let currentView = 'dashboard';
+        let viewHistory = []; // NEW: Store history for back navigation
         let currentUser = null;
         let userProfile = null;
         let quizSession = null; // Holds current or last completed quiz session data
@@ -754,7 +766,8 @@
             await set(profileRef, newProfile);
             userProfile = newProfile;
             isTestPaid = userProfile.isTestPaid;
-            updateProfileUI();
+            // When setting up a profile, go to the dashboard without history
+            viewHistory = [];
             renderView('dashboard');
         };
 
@@ -870,7 +883,8 @@
             const questionData = await fetchQuizQuestions(subject, difficulty, isTest ? 15 : 10);
 
             if (!questionData || questionData.length === 0) {
-                renderView('dashboard');
+                // If loading fails, automatically go back to the selection screen
+                goBack();
                 return;
             }
 
@@ -885,6 +899,11 @@
                 startTime: Date.now(),
                 duration: 0,
             };
+
+            // Before rendering the quiz, ensure the stage selection view is in history
+            if (currentView !== 'stage-selection') {
+                viewHistory.push('stage-selection');
+            }
 
             renderView('quiz');
             renderQuestion();
@@ -953,7 +972,7 @@
         };
 
         const selectOption = (selectedIndex) => {
-            if (!quizSession) return;
+            if (!quizSession || quizSession.questions[quizSession.currentQIndex].userAnswer !== -1) return; // Prevent double clicking
 
             const q = quizSession.questions[quizSession.currentQIndex];
             const isCorrect = selectedIndex === q.correct_answer_index;
@@ -1002,7 +1021,7 @@
             }
         };
 
-        // FIX: Ensure result view logic is explicitly called
+        // FIX: Ensure result view logic is explicitly called after quiz ends
         const endQuiz = () => {
             playSound('level_up');
             // IMPORTANT: Save the history and then immediately update the UI
@@ -1050,7 +1069,11 @@
         };
 
         const openReviewScreen = (session, sourceView) => {
-            // FIX: Ensure quizSession is updated correctly for review to load data
+            // Store the current view for the back button
+            if (currentView !== 'review') {
+                viewHistory.push(currentView);
+            }
+
             quizSession = session;
             renderView('review');
 
@@ -1105,9 +1128,9 @@
                 });
 
                 html += `<div class="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                             <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
-                             <p class="text-sm text-gray-800">${explanationText}</p>
-                           </div>`;
+                                   <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
+                                   <p class="text-sm text-gray-800">${explanationText}</p>
+                                  </div>`;
 
                 card.innerHTML = html;
                 reviewList.appendChild(card);
@@ -1115,7 +1138,7 @@
         };
 
 
-        // --- UI/VIEW MANAGEMENT ---
+        // --- UI/VIEW MANAGEMENT & BACK LOGIC ---
 
         const hideAllViews = () => {
             // Explicitly hide all sections
@@ -1131,6 +1154,23 @@
                 viewName = 'login';
             }
 
+            // Navigation Logic: Only save navigations that aren't back-actions or repeated navigation
+            if (viewName !== currentView && !['result', 'review', 'login', 'profile-setup'].includes(currentView)) {
+                if (viewHistory.length === 0 || viewHistory[viewHistory.length - 1] !== currentView) {
+                    viewHistory.push(currentView);
+                }
+            } else if (viewName === currentView) {
+                // If rendering the same view, clear the history, e.g., refreshing dashboard
+                if (['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName)) {
+                    viewHistory = [];
+                }
+            }
+
+            // Handle specific navigation path cleanup that bypasses history
+            if (viewName === 'dashboard' || viewName === 'login' || viewName === 'profile-setup') {
+                viewHistory = [];
+            }
+
             hideAllViews();
             currentView = viewName;
 
@@ -1140,7 +1180,7 @@
             const activeNavBtn = document.querySelector(`.nav-item[data-view="${viewName}"]`);
             if (activeNavBtn) activeNavBtn.classList.replace('text-gray-500', 'text-violet-500');
 
-            // FIX: Only show bottom nav for main navigation screens
+            // Bottom Nav Visibility
             const showNav = ['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName);
             const bottomNav = document.getElementById('bottom-nav');
             if (showNav) {
@@ -1149,10 +1189,18 @@
                 bottomNav.classList.add('hidden');
             }
 
+            // Header Back Button Visibility
+            const backBtn = document.getElementById('header-back-btn');
+            const showBackBtn = ['stage-selection', 'quiz', 'result', 'review'].includes(viewName);
+            if (showBackBtn) {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+            }
+
             switch (viewName) {
                 case 'dashboard':
                     document.getElementById('header-title').textContent = 'Smart Kid';
-                    // Clear the last quiz session when going to the dashboard
                     quizSession = null;
                     renderDashboard();
                     break;
@@ -1183,9 +1231,38 @@
                     renderReviewView();
                     break;
             }
+            console.log("Current View:", currentView, "History:", viewHistory);
         };
 
-        // --- SUBJECT FILTERING LOGIC ---
+        const goBack = () => {
+            let previousView = viewHistory.pop();
+
+            if (previousView) {
+                // Special handling for paths that jump between views:
+                if (previousView === 'stage-selection') {
+                    // Back from stage-selection should go to dashboard, clearing history
+                    renderView('dashboard');
+                } else if (previousView === 'quiz' && currentView === 'result') {
+                    // This scenario shouldn't happen if quiz is successfully completed. If it does, go to dashboard.
+                    renderView('dashboard');
+                } else if (previousView === 'result' && currentView === 'review') {
+                    // Back from review (result source) goes back to result
+                    renderView('result');
+                } else {
+                    renderView(previousView);
+                }
+            } else {
+                // If history is empty, assume dashboard or login screen
+                if (currentUser) {
+                    renderView('dashboard');
+                } else {
+                    renderView('login');
+                }
+            }
+        };
+
+
+        // --- SUBJECT FILTERING LOGIC (REST OF THE CODE) ---
 
         const getStandardSubjects = (standard) => {
             const std = parseInt(standard);
@@ -1212,6 +1289,7 @@
                 <span class="text-4xl">${subject.emoji}</span>
                 <span class="text-sm font-semibold text-center">${subject.name}</span>
             `;
+                // Add dashboard view to history before going to selection
                 card.onclick = () => renderDifficultySelection(subject.name);
                 gridContainer.appendChild(card);
             });
@@ -1233,8 +1311,8 @@
                 <div class="flex items-center space-x-4">
                     <div class="text-3xl">${diff.emoji}</div>
                     <div>
-                           <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
-                           <p class="font-semibold text-sm opacity-90">${subject}</p>
+                            <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
+                            <p class="font-semibold text-sm opacity-90">${subject}</p>
                     </div>
                 </div>
                 <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Multiplier: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
@@ -1290,6 +1368,9 @@
         };
 
         const showPaymentModal = () => {
+            // Save current view to history before modal pop-up
+            if (currentView !== 'dashboard') viewHistory.push(currentView);
+
             showModal(
                 L('modal-pay-title'),
                 L('modal-pay-message'),
@@ -1311,12 +1392,14 @@
 
                         checkWeeklyTestStatus();
                         updateProfileUI();
+                        // Go back to dashboard after payment success
+                        renderView('dashboard');
                     }, 2000);
                 }
             );
         };
 
-        // --- LEADERBOARD & HISTORY RENDERING ---
+        // --- LEADERBOARD & HISTORY RENDERING (REST OF THE CODE) ---
 
         const renderLeaderboard = async () => {
             const list = document.getElementById('leaderboard-list');
@@ -1413,7 +1496,7 @@
             });
         };
 
-        // --- GLOBAL MODAL SYSTEM ---
+        // --- GLOBAL MODAL SYSTEM (REST OF THE CODE) ---
 
         const showModal = (title, message, isConfirm = false, onConfirm = () => { }) => {
             const modal = document.getElementById('global-modal');
@@ -1468,13 +1551,17 @@
             document.getElementById('profile-setup-form').addEventListener('submit', saveProfile);
             document.getElementById('quiz-next-btn').addEventListener('click', nextQuestion);
 
-            // FIX: Ensure 'Go to Dashboard' clears session and renders dashboard
+            // NEW: Back button handler
+            document.getElementById('header-back-btn').addEventListener('click', goBack);
+
+            // Ensure 'Go to Dashboard' clears session and renders dashboard
             document.getElementById('back-to-dashboard-btn').addEventListener('click', () => {
                 quizSession = null;
+                // Use renderView('dashboard') directly, clearing history
                 renderView('dashboard');
             });
 
-            // FIX: Ensure 'Review Answers' button uses the currently active quizSession
+            // Ensure 'Review Answers' button uses the currently active quizSession
             document.getElementById('review-answers-btn').addEventListener('click', () => {
                 if (quizSession) {
                     openReviewScreen(quizSession, 'result');
@@ -1489,11 +1576,15 @@
                 currentLanguage = e.target.value;
                 localStorage.setItem('smartkid_lang', currentLanguage);
                 localizeElements();
+                // Re-render the current view to apply new localization
+                renderView(currentView);
             });
 
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const view = btn.getAttribute('data-view');
+                    // Navigating via bottom bar always resets history and goes to the main view
+                    viewHistory = [];
                     renderView(view);
                 });
             });
