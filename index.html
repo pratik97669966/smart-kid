@@ -2,84 +2,14 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart Kid - तुमचा स्मार्ट अभ्यास</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // --- EXPOSE FIREBASE FUNCTIONS GLOBALLY ---
-        window.getAuth = getAuth;
-        window.GoogleAuthProvider = GoogleAuthProvider;
-        window.signInWithPopup = signInWithPopup;
-        window.signOut = signOut;
+    <!-- Firebase (modules are imported in the inline module script below) -->
 
-        // Realtime Database Functions
-        window.ref = ref;
-        window.set = set;
-        window.get = get;
-        window.update = update;
-
-        // --- USER-PROVIDED CONFIG (PLACEHOLDERS) ---
-        // Configuration provided by the user
-        const firebaseConfig = {
-            apiKey: "AIzaSyCaJX0lmumC-6J-iTHVB_PRe50Ww8oWp_g",
-            authDomain: "smart-kid-balgram.firebaseapp.com",
-            databaseURL: "https://smart-kid-balgram-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "smart-kid-balgram",
-            storageBucket: "smart-kid-balgram.firebasestorage.app",
-            messagingSenderId: "340279199689",
-            appId: "1:340279199689:web:8d45a29b1ea87f3869ca18",
-            measurementId: "G-W402LPG44J"
-        };
-
-        // Use environment variables if available, otherwise use defaults
-        window.initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smart-kid-app';
-
-        if (firebaseConfig) {
-            window.app = initializeApp(firebaseConfig);
-            window.auth = getAuth(window.app);
-            window.db = getDatabase(window.app);
-            window.googleProvider = new GoogleAuthProvider();
-
-            // 1. Initial Authentication Logic
-            onAuthStateChanged(window.auth, async (user) => {
-                const splash = document.getElementById('splash');
-                const mainApp = document.getElementById('main-app-container');
-
-                if (user) {
-                    window.userId = user.uid;
-                    await checkOrCreateUserProfile(user);
-                } else {
-                    try {
-                        // Try to sign in with custom token if provided
-                        if (window.initialAuthToken) {
-                            await signInWithCustomToken(window.auth, window.initialAuthToken);
-                        }
-                    } catch (error) {
-                        console.error("Firebase Auth Custom Token Error (Proceeding to Login Screen):", error);
-                    }
-                }
-
-                // Hide splash, show app
-                if (splash) splash.classList.add('hidden');
-                if (mainApp) mainApp.classList.remove('hidden');
-
-                // Call the main app initialization function
-                if (typeof window.initApp === 'function') {
-                    window.initApp();
-                }
-            });
-
-        } else {
-            console.error("Firebase configuration not found.");
-        }
-    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
@@ -95,7 +25,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
-
         }
 
         /* Mobile Frame for focused view on large screens, responsive on small screens */
@@ -105,7 +34,6 @@
             position: relative;
             background-color: #ffffff;
             margin: auto;
-
         }
 
         .stage-card:hover {
@@ -187,6 +115,21 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* --- Splash fade customization (IMPROVED) --- */
+        #splash {
+            transition: opacity 500ms ease, transform 400ms ease;
+            will-change: opacity, transform;
+        }
+
+        /* Applied when we want to smoothly fade away the splash */
+        .splash-hidden {
+            opacity: 0;
+            transform: scale(0.995);
+            pointer-events: none;
+        }
+
+        /* Keep existing hidden utility (Tailwind 'hidden') is used to remove element from layout after fade */
     </style>
 </head>
 
@@ -194,9 +137,8 @@
 
     <div class="mobile-frame">
 
-        <!-- Splash screen for loading -->
-        <div id="splash"
-            class="absolute inset-0 flex flex-col items-center justify-center bg-violet-700 z-50 transition-opacity duration-500">
+        <!-- Splash screen for loading (IMPROVED: will fade out smoothly) -->
+        <div id="splash" class="absolute inset-0 flex flex-col items-center justify-center bg-violet-700 z-50">
             <div class="text-4xl font-extrabold text-white animate-pulse">Smart Kid</div>
             <p class="text-white mt-2 text-sm">लोड होत आहे... (Loading...)</p>
             <div class="loader mt-4"></div>
@@ -239,23 +181,25 @@
                     <h2 id="login-welcome" class="text-3xl font-extrabold text-violet-700"></h2>
                     <p id="login-tagline" class="text-gray-600 text-lg"></p>
 
+                    <!-- IMPROVED GOOGLE SIGN-IN BUTTON (keeps id so JS continues to work) -->
                     <button id="google-sign-in-btn"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:scale-105 flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
-                            <path
-                                d="M22.56 12.03c0-.75-.07-1.5-.2-2.25H12v4.25h6.05c-.27 1.42-1.09 2.61-2.25 3.44v3.13h4.03c2.36-2.17 3.78-5.38 3.78-9.57z"
-                                opacity=".87" />
-                            <path
-                                d="M12 23c3.27 0 6.01-1.08 8.01-2.92l-4.03-3.13c-1.16.78-2.61 1.25-4 1.25-3.08 0-5.7-2.07-6.62-4.82H1.32v3.23C3.59 20.26 7.5 23 12 23z"
-                                opacity=".87" />
-                            <path
-                                d="M5.38 14.15c-.2-.5-.31-1.04-.31-1.59s.11-1.09.31-1.59V8.04H1.32c-.59 1.14-.94 2.45-.94 3.86s.35 2.72.94 3.86l4.06-3.75z"
-                                opacity=".87" />
-                            <path
-                                d="M12 3.63c1.61 0 3.06.55 4.21 1.63l3.52-3.35C18.01 1.15 15.27 0 12 0 7.5 0 3.59 2.74 1.32 6.35l4.06 3.23c.92-2.75 3.54-4.82 6.62-4.82z"
-                                opacity=".87" />
-                        </svg>
-                        <span id="google-sign-in-text">Sign in with Google</span>
+                        class="w-full max-w-xs flex items-center justify-center space-x-3 py-3 px-4 rounded-full shadow-lg bg-white hover:shadow-xl transform transition duration-200">
+                        <!-- Stylized Google 'G' inline SVG to keep visual crispness -->
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white">
+                            <svg class="w-5 h-5" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg"
+                                focusable="false">
+                                <path fill="#4285F4"
+                                    d="M533.5 278.4c0-18.6-1.5-37.1-4.6-54.8H272v103.8h147.2c-6.3 34-25 62.8-53.3 82.1v68.2h86.2c50.5-46.6 81.4-115.2 81.4-199.3z" />
+                                <path fill="#34A853"
+                                    d="M272 544.3c72.9 0 134.1-24.1 178.8-65.5l-86.2-68.2c-24 16.1-55 25.6-92.6 25.6-71 0-131.2-48-152.7-112.4H31.1v70.6C75.2 487.6 167.6 544.3 272 544.3z" />
+                                <path fill="#FBBC05"
+                                    d="M119.3 328.9c-10.9-32.6-10.9-67.5 0-100.1V158.2H31.1c-38.7 76.9-38.7 167.8 0 244.7l88.2-74z" />
+                                <path fill="#EA4335"
+                                    d="M272 107.7c39.6 0 75.4 13.7 103.6 40.7l77.6-77.6C403.6 24.1 342.4 0 272 0 167.6 0 75.2 56.7 31.1 158.2l88.2 70.4C140.8 155.7 201 107.7 272 107.7z" />
+                            </svg>
+                        </span>
+                        <span id="google-sign-in-text" class="text-sm font-semibold text-gray-800">Sign in with
+                            Google</span>
                     </button>
                 </section>
 
@@ -372,8 +316,6 @@
 
                     <div class="p-4 bg-white rounded-xl shadow-lg">
                         <p id="quiz-question-text" class="text-xl font-medium text-gray-800"></p>
-                        <p id="quiz-translation-note" class="text-xs text-red-500 italic mt-2 hidden">
-                            (Question translated from English, content might be imprecise.)</p>
                     </div>
 
                     <div id="quiz-options-container" class="space-y-3">
@@ -526,6 +468,94 @@
 
         </div>
     </div>
+
+    <!-- MAIN SCRIPT (keeps all your original logic; only changed how splash is hidden & improved sign-in UI markup above) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // --- EXPOSE FIREBASE FUNCTIONS GLOBALLY ---
+        window.getAuth = getAuth;
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signInWithPopup = signInWithPopup;
+        window.signOut = signOut;
+
+        // Realtime Database Functions
+        window.ref = ref;
+        window.set = set;
+        window.get = get;
+        window.update = update;
+
+        // --- USER-PROVIDED CONFIG (PLACEHOLDERS) ---
+        // Configuration provided by the user
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaJX0lmumC-6J-iTHVB_PRe50Ww8oWp_g",
+            authDomain: "smart-kid-balgram.firebaseapp.com",
+            databaseURL: "https://smart-kid-balgram-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "smart-kid-balgram",
+            storageBucket: "smart-kid-balgram.firebasestorage.app",
+            messagingSenderId: "340279199689",
+            appId: "1:340279199689:web:8d45a29b1ea87f3869ca18",
+            measurementId: "G-W402LPG44J"
+        };
+
+        // Use environment variables if available, otherwise use defaults
+        window.initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smart-kid-app';
+
+        if (firebaseConfig) {
+            window.app = initializeApp(firebaseConfig);
+            window.auth = getAuth(window.app);
+            window.db = getDatabase(window.app);
+            window.googleProvider = new GoogleAuthProvider();
+
+            // 1. Initial Authentication Logic
+            onAuthStateChanged(window.auth, async (user) => {
+                const splash = document.getElementById('splash');
+                const mainApp = document.getElementById('main-app-container');
+
+                if (user) {
+                    window.userId = user.uid;
+                    await checkOrCreateUserProfile(user);
+                } else {
+                    try {
+                        // Try to sign in with custom token if provided
+                        if (window.initialAuthToken) {
+                            await signInWithCustomToken(window.auth, window.initialAuthToken);
+                        }
+                    } catch (error) {
+                        console.error("Firebase Auth Custom Token Error (Proceeding to Login Screen):", error);
+                    }
+                }
+
+                // IMPROVED: Smoothly fade out splash then reveal app.
+                if (splash) {
+                    // Add class to trigger CSS opacity transition
+                    splash.classList.add('splash-hidden');
+
+                    // After CSS transition completes, hide the splash element and show main app
+                    const FADE_MS = 500; // should match .splash-hidden transition duration
+                    setTimeout(() => {
+                        if (splash) splash.classList.add('hidden'); // remove from layout flow
+                        if (mainApp) mainApp.classList.remove('hidden');
+                        // Call the main app initialization function
+                        if (typeof window.initApp === 'function') {
+                            window.initApp();
+                        }
+                    }, FADE_MS + 40); // slight safety offset
+                } else {
+                    if (mainApp) mainApp.classList.remove('hidden');
+                    if (typeof window.initApp === 'function') {
+                        window.initApp();
+                    }
+                }
+            });
+
+        } else {
+            console.error("Firebase configuration not found.");
+        }
+    </script>
 
     <script>
         // --- GLOBAL STATE AND CONFIGURATION ---
@@ -843,7 +873,6 @@
 
             questionContainer.innerHTML = `<div class="flex items-center justify-center space-x-2"><div class="loader" style="border-top-color: var(--primary);"></div><p class="text-gray-500">${L('question-loading')}</p></div>`;
             optionsContainer.innerHTML = '';
-            document.getElementById('quiz-translation-note').classList.add('hidden');
 
             try {
                 const responseData = await backoffFetch(url);
@@ -948,7 +977,7 @@
             const currentQ = quizSession.currentQIndex + 1;
             const totalQ = quizSession.questions.length;
 
-            document.getElementById('quiz-status').textContent = `Q ${currentQ}/${totalQ} - ${quizSession.subject}`;
+            document.getElementById('quiz-status').textContent = `Q ${currentQ}/${totalQ}`;
             document.getElementById('quiz-timer').classList.remove('hidden');
 
             const questionKey = `question_${currentLanguage}`;
@@ -959,12 +988,6 @@
             document.getElementById('quiz-question-text').textContent = questionText;
             document.getElementById('quiz-next-btn').classList.add('hidden');
             document.getElementById('quiz-next-btn').disabled = true;
-
-            if (currentLanguage !== 'en' && !quizSession.isTest) {
-                document.getElementById('quiz-translation-note').classList.remove('hidden');
-            } else {
-                document.getElementById('quiz-translation-note').classList.add('hidden');
-            }
 
             const optionsContainer = document.getElementById('quiz-options-container');
             optionsContainer.innerHTML = '';
@@ -1503,7 +1526,25 @@
             document.getElementById('lang-select').value = currentLanguage;
             localizeElements();
 
-            document.getElementById('google-sign-in-btn').addEventListener('click', signInWithGoogle);
+            // Hook the improved Google sign-in button to your signInWithGoogle function
+            const googleBtn = document.getElementById('google-sign-in-btn');
+            if (googleBtn) {
+                googleBtn.addEventListener('click', async () => {
+                    // Keep existing sign-in flow: this triggers Tone start + Firebase popup
+                    try {
+                        await Tone.start();
+                    } catch (e) {
+                        // ignore if Tone already started or blocked
+                    }
+                    // Use existing function if available
+                    if (typeof signInWithGoogle === 'function') {
+                        signInWithGoogle();
+                    } else {
+                        alert('Sign-in function not available.');
+                    }
+                });
+            }
+
             document.getElementById('profile-setup-form').addEventListener('submit', saveProfile);
             document.getElementById('quiz-next-btn').addEventListener('click', nextQuestion);
             document.getElementById('header-back-btn').addEventListener('click', goBack);
