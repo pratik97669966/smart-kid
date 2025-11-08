@@ -29,7 +29,6 @@
         window.update = update;
 
         // --- USER-PROVIDED CONFIG ---
-        // Overwriting __firebase_config usage with user's explicit config
         const firebaseConfig = {
             apiKey: "AIzaSyCaJX0lmumC-6J-iTHVB_PRe50Ww8oWp_g",
             authDomain: "smart-kid-balgram.firebaseapp.com",
@@ -59,7 +58,6 @@
                     window.userId = user.uid;
                     await checkOrCreateUserProfile(user);
                 } else {
-                    // Attempt custom token sign-in provided by the environment.
                     try {
                         if (window.initialAuthToken) {
                             await signInWithCustomToken(window.auth, window.initialAuthToken);
@@ -72,7 +70,6 @@
                 if (splash) splash.classList.add('hidden');
                 if (mainApp) mainApp.classList.remove('hidden');
 
-                // Start the main JS logic after auth is settled
                 if (typeof window.initApp === 'function') {
                     window.initApp();
                 }
@@ -171,20 +168,22 @@
             }
         }
 
-        /* Stage Path Styling (Candy Crush Path) */
-        #stage-list {
+        /* Stage Path Styling (Candy Crush Path) - Applied to Subject Stages */
+        #subject-stage-map {
             position: relative;
-            padding-top: 50px;
-            padding-bottom: 50px;
+            padding: 20px 0;
             background: linear-gradient(to bottom, #d1d5db 0%, #f3f4f6 100%);
-            border-radius: 1rem;
+            border-radius: 1.5rem;
+            max-width: 80%;
+            /* Center the path structure */
+            margin: 20px auto;
         }
 
-        .stage-node {
+        .subject-node {
             position: relative;
-            margin: 30px auto;
-            width: 80px;
-            height: 80px;
+            margin: 40px auto;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -193,33 +192,32 @@
             color: white;
             z-index: 10;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .stage-node:hover {
-            transform: scale(1.1);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 4px solid #fff;
         }
 
-        .stage-node::after {
+        .subject-node:hover {
+            transform: scale(1.1);
+        }
+
+        .subject-node::after {
             content: '';
             position: absolute;
-            top: 80px;
+            top: 90px;
             /* Position below node */
             left: 50%;
-            width: 6px;
-            height: 60px;
+            width: 8px;
+            height: 40px;
             /* Length of the connecting path */
-            background-color: #9ca3af;
-            /* Gray path */
+            background: linear-gradient(to top, #6b7280, #9ca3af);
+            /* Gradient path */
             z-index: 5;
             transform: translateX(-50%);
         }
 
-        .stage-node:last-child::after {
+        .subject-node:last-child::after {
             content: none;
-            /* No path after the last node */
         }
 
         /* Loading Spinner */
@@ -272,14 +270,7 @@
                                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </button>
-                    <div id="language-toggle" class="relative">
-                        <select id="lang-select"
-                            class="bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 transition duration-150">
-                            <option value="en">English</option>
-                            <option value="mr">मराठी</option>
-                            <option value="hi">हिन्दी</option>
-                        </select>
-                    </div>
+                    <!-- Language toggle REMOVED from header -->
                 </div>
             </header>
 
@@ -355,18 +346,30 @@
                     </form>
                 </section>
 
-                <!-- Dashboard View -->
+                <!-- Dashboard View (Now the Subject Stage Map) -->
                 <section id="dashboard-view" class="space-y-6 hidden">
                     <!-- Profile Card -->
-                    <div class="p-6 bg-violet-600 text-white rounded-2xl shadow-xl flex items-center justify-between">
+                    <div
+                        class="p-6 bg-violet-600 text-white rounded-2xl shadow-xl flex items-center justify-between mb-4">
                         <div>
                             <p id="welcome-greeting" class="text-xl font-medium"></p>
                             <h2 id="dashboard-user-name" class="text-3xl font-extrabold truncate max-w-[200px]"></h2>
-                            <p class="text-sm opacity-90 mt-1">Score: <span id="dashboard-user-score">0</span></p>
+                            <p class="text-sm opacity-90 mt-1">Score: <span id="dashboard-user-score">0</span> 🏆</p>
                         </div>
                         <img id="dashboard-profile-img" src="https://placehold.co/64x64/8b5cf6/ffffff?text=P"
                             class="w-16 h-16 rounded-full border-4 border-white object-cover shadow-md"
                             alt="Profile Picture">
+                    </div>
+
+                    <!-- Language Toggle (FIX: Moved here to the dashboard) -->
+                    <div id="language-toggle" class="relative text-center mb-6">
+                        <label class="text-gray-700 font-semibold text-sm mr-2">Change Language:</label>
+                        <select id="lang-select"
+                            class="bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 transition duration-150">
+                            <option value="en">English</option>
+                            <option value="mr">मराठी</option>
+                            <option value="hi">हिन्दी</option>
+                        </select>
                     </div>
 
                     <!-- Weekly Test Card (Gamified/Premium) -->
@@ -374,12 +377,7 @@
                         class="p-4 bg-yellow-400 rounded-2xl shadow-lg border-4 border-yellow-600 transform transition duration-300 hover:scale-[1.02] cursor-pointer hidden">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-800"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                                <span class="text-3xl">⭐</span>
                                 <div>
                                     <h3 id="test-card-title" class="text-xl font-bold text-yellow-800"></h3>
                                     <p id="test-card-status" class="text-sm text-yellow-700"></p>
@@ -390,19 +388,19 @@
                         </div>
                     </div>
 
-                    <!-- Subject Selection Grid -->
-                    <h3 id="subjects-heading" class="text-2xl font-extrabold text-gray-800 pt-2"></h3>
-                    <div id="subject-grid" class="grid grid-cols-2 gap-4">
-                        <!-- Subject Cards will be injected here -->
+                    <!-- Subject Selection Grid (Now the Candy Crush Stage Map) -->
+                    <h3 id="subjects-heading" class="text-2xl font-extrabold text-gray-800 text-center pt-4"></h3>
+                    <div id="subject-stage-map" class="flex flex-col-reverse justify-end">
+                        <!-- Subject Nodes (Stages) will be injected here -->
                     </div>
                 </section>
 
-                <!-- Stage Selection View (Gamified Level Map) -->
+                <!-- Stage Selection View (Now Difficulty Selection) -->
                 <section id="stage-selection-view" class="space-y-6 hidden">
                     <h2 id="stage-selection-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
                     <p id="stage-selection-subtitle" class="text-center text-gray-600"></p>
-                    <div id="stage-list" class="flex flex-col space-y-20 p-8">
-                        <!-- Stages/Levels will be injected here (Difficulty Levels: Easy, Medium, Hard) -->
+                    <div id="stage-list" class="flex flex-col space-y-4">
+                        <!-- Difficulty Levels (Easy, Medium, Hard) will be injected here -->
                     </div>
                 </section>
 
@@ -576,7 +574,6 @@
 
     <script>
         // --- GLOBAL STATE AND CONFIGURATION ---
-        // Using Open Trivia Database for free, vast question supply. Note: Only English is supported.
         const API_URL_TRIVIA = 'https://opentdb.com/api.php';
 
         let currentView = 'dashboard';
@@ -587,20 +584,24 @@
         let isWeeklyTestAvailable = false;
         let isTestPaid = false;
 
-        const SUBJECTS = ['Math', 'Science', 'History', 'Geography', 'Marathi Grammar'];
-        // Open Trivia categories: 19: Math, 17: Science, 23: History, 22: Geography. Marathi Grammar will use a general category.
-        const TRIVIA_CATEGORIES = {
-            'Math': 19,
-            'Science': 17,
-            'History': 23,
-            'Geography': 22,
-            'Marathi Grammar': 9 // General Knowledge fallback
-        };
+        // Subject/Stage Definitions with colors and emojis
+        const SUBJECTS_DATA = [
+            { name: 'Math', emoji: '📐', color: 'bg-red-500', categoryId: 19 },
+            { name: 'Science', emoji: '🧪', color: 'bg-green-500', categoryId: 17 },
+            { name: 'History', emoji: '🏛️', color: 'bg-blue-500', categoryId: 23 },
+            { name: 'Geography', emoji: '🌍', color: 'bg-amber-500', categoryId: 22 },
+            { name: 'Marathi Grammar', emoji: '📚', color: 'bg-purple-500', categoryId: 9 } // General Knowledge fallback
+        ];
+        const SUBJECTS = SUBJECTS_DATA.map(s => s.name);
+        const TRIVIA_CATEGORIES = SUBJECTS_DATA.reduce((acc, s) => {
+            acc[s.name] = s.categoryId;
+            return acc;
+        }, {});
 
         const DIFFICULTIES = {
-            'easy': { label: { en: 'Easy', mr: 'सोपे', hi: 'आसान' }, color: 'bg-emerald-500', icon: 'M5 13l4 4L19 7' },
-            'medium': { label: { en: 'Medium', mr: 'मध्यम', hi: 'मध्यम' }, color: 'bg-yellow-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-            'hard': { label: { en: 'Hard', mr: 'कठीण', hi: 'कठिन' }, color: 'bg-red-500', icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8' }
+            'easy': { label: { en: 'Easy', mr: 'सोपे', hi: 'आसान' }, emoji: '👶', color: 'bg-emerald-500' },
+            'medium': { label: { en: 'Medium', mr: 'मध्यम', hi: 'मध्यम' }, emoji: '🧑', color: 'bg-yellow-500' },
+            'hard': { label: { en: 'Hard', mr: 'कठीण', hi: 'कठिन' }, emoji: '🧠', color: 'bg-red-500' }
         };
 
         // Localization Texts
@@ -619,7 +620,7 @@
             'nav-history-text': { en: 'History', mr: 'इतिहास', hi: 'इतिहास' },
             'nav-profile-text': { en: 'Profile', mr: 'प्रोफाइल', hi: 'प्रोफ़ाइल' },
             'welcome-greeting': { en: 'Hello, Scholar!', mr: 'नमस्ते, विद्वाना!', hi: 'नमस्ते, विद्वान!' },
-            'subjects-heading': { en: 'Choose a Subject Stage:', mr: 'एक विषय निवडा:', hi: 'एक विषय चुनें:' },
+            'subjects-heading': { en: 'Choose Your Subject Stage:', mr: 'तुमचा विषय टप्पा निवडा:', hi: 'अपना विषय स्टेज चुनें:' },
             'stage-selection-title': { en: 'Select Difficulty', mr: 'कठीण पातळी निवडा', hi: 'कठिनाई स्तर चुनें' },
             'stage-selection-subtitle': { en: 'Higher difficulty means higher score points!', mr: 'जास्त कठिण म्हणजे जास्त गुण!', hi: 'अधिक कठिनाई का अर्थ है अधिक अंक!' },
             'next-btn-text': { en: 'Next Question', mr: 'पुढचा प्रश्न', hi: 'अगला प्रश्न' },
@@ -630,26 +631,27 @@
             'review-btn-text': { en: 'Review Answers', mr: 'उत्तरांचे पुनरावलोकन करा', hi: 'उत्तरों की समीक्षा करें' },
             'dashboard-btn-text': { en: 'Back to Dashboard', mr: 'डॅशबोर्डवर परत', hi: 'डैशबोर्ड पर वापस' },
             'close-review-text': { en: 'Back to Results', mr: 'निकालांवर परत', hi: 'परिणामों पर वापस' },
+            'back-to-history-text': { en: 'Back to History', mr: 'इतिहासावर परत', hi: 'इतिहास पर वापस' }, // New key
             'profile-page-title': { en: 'Your Profile', mr: 'तुमची प्रोफाइल', hi: 'आपकी प्रोफ़ाइल' },
             'sign-out-text': { en: 'Sign Out', mr: 'साइन आउट करा', hi: 'साइन आउट करें' },
             'test-card-title': { en: 'Weekly Scholar Test', mr: 'साप्ताहिक स्कॉलर चाचणी', hi: 'साप्ताहिक स्कॉलर टेस्ट' },
             'test-card-status-inactive': { en: 'Check back next Sunday!', mr: 'पुढच्या रविवारी तपासा!', hi: 'अगले रविवार को देखें!' },
             'test-card-status-active': { en: 'Test is Live! Click to Start.', mr: 'चाचणी लाईव्ह आहे! सुरू करण्यासाठी क्लिक करा.', hi: 'टेस्ट लाइव है! शुरू करने के लिए क्लिक करें।' },
-            'test-card-status-paid': { en: 'Test Paid!', mr: 'चाचणी सशुल्क!', hi: 'टेस्ट पेड!' },
+            'test-card-status-paid': { en: 'Test Paid! ✅', mr: 'चाचणी सशुल्क! ✅', hi: 'टेस्ट पेड! ✅' },
             'test-card-status-pay': { en: 'One-time fee: ₹9.00', mr: 'एक-वेळ शुल्क: ₹९.००', hi: 'एक बार का शुल्क: ₹९.००' },
             'test-card-btn-start': { en: 'START', mr: 'सुरू करा', hi: 'शुरू करें' },
             'test-card-btn-pay': { en: 'PAY ₹9.00', mr: 'पेमेंट करा ₹९.००', hi: 'भुगतान करें ₹९.००' },
-            'leaderboard-title': { en: 'Top Global Scorers', mr: 'शीर्ष जागतिक स्कोअरर्स', hi: 'शीर्ष वैश्विक स्कोरर' },
-            'history-title': { en: 'My Quiz History', mr: 'माझा क्विझ इतिहास', hi: 'मेरा क्विज़ इतिहास' },
+            'leaderboard-title': { en: 'Top Global Scorers 🥇', mr: 'शीर्ष जागतिक स्कोअरर्स 🥇', hi: 'शीर्ष वैश्विक स्कोरर 🥇' },
+            'history-title': { en: 'My Quiz History 📜', mr: 'माझा क्विझ इतिहास 📜', hi: 'मेरा क्विज़ इतिहास 📜' },
             'history-loading': { en: 'Loading history...', mr: 'इतिहास लोड होत आहे...', hi: 'इतिहास लोड हो रहा है...' },
             'leaderboard-loading': { en: 'Loading leaderboard...', mr: 'लीडरबोर्ड लोड होत आहे...', hi: 'लीडरबोर्ड लोड हो रहा है...' },
             'question-loading': { en: 'Fetching Questions...', mr: 'प्रश्न आणले जात आहेत...', hi: 'प्रश्न प्राप्त किए जा रहे हैं...' },
-            'question-generating-error': { en: 'Could not fetch questions. Try again.', mr: 'प्रश्न मिळू शकले नाही. पुन्हा प्रयत्न करा.', hi: 'प्रश्न प्राप्त नहीं हो सके। पुनः प्रयास करें।' },
+            'question-generating-error': { en: 'Could not fetch questions. Try again.', mr: 'प्रश्न मिळू शकले नाही. पुन्हा प्रयत्न करा.', hi: 'प्रश्न प्राप्त नहीं हो सके। पुनः प्रयास करें.' },
             'modal-pay-title': { en: 'One-time Payment for Test', mr: 'चाचणीसाठी एकदाच पेमेंट', hi: 'टेस्ट के लिए एक बार का भुगतान' },
             'modal-pay-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock all weekly tests permanently.', mr: 'सर्व साप्ताहिक चाचण्या कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा.', hi: 'सभी साप्ताहिक टेस्ट को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें।' },
             'review-explanation-text': { en: 'Correct Answer Explanation', mr: 'योग्य उत्तराचे स्पष्टीकरण', hi: 'सही उत्तर का स्पष्टीकरण' },
-            'profile-test-paid': { en: 'Weekly Test Status: PAID (Unlocked Permanently)', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क (कायमस्वरूपी अनलॉक)', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान किया गया (स्थायी रूप से अनलॉक)' },
-            'profile-test-unpaid': { en: 'Weekly Test Status: UNPAID', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क नाही', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान नहीं किया गया' }
+            'profile-test-paid': { en: 'Weekly Test Status: PAID (Unlocked Permanently) 🎉', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क (कायमस्वरूपी अनलॉक) 🎉', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान किया गया (स्थायी रूप से अनलॉक) 🎉' },
+            'profile-test-unpaid': { en: 'Weekly Test Status: UNPAID 🔒', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क नाही 🔒', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान नहीं किया गया 🔒' }
         };
 
         // --- UTILITY FUNCTIONS ---
@@ -691,7 +693,6 @@
             document.getElementById('next-btn-text').textContent = L('next-btn-text');
             document.getElementById('review-btn-text').textContent = L('review-btn-text');
             document.getElementById('dashboard-btn-text').textContent = L('dashboard-btn-text');
-            document.getElementById('close-review-text').textContent = L('close-review-text');
 
             document.getElementById('profile-page-title').textContent = L('profile-page-title');
             document.getElementById('sign-out-text').textContent = L('sign-out-text');
@@ -701,8 +702,11 @@
             document.getElementById('history-loading').textContent = L('history-loading');
 
             if (userProfile) {
-                renderView(currentView);
-                updateProfileUI(); // Ensure test status text is updated
+                // Re-render views to apply new language and state
+                updateProfileUI();
+                if (currentView === 'result') renderResultView();
+                if (currentView === 'review') renderReviewView();
+                if (currentView === 'dashboard') renderDashboard();
             }
         };
 
@@ -844,28 +848,25 @@
                 document.getElementById('profile-medium').innerHTML = `<span class="font-semibold">${L('label-medium')}:</span> ${userProfile.medium}`;
 
                 // Update Test Paid Status on Profile View
-                const paidStatusText = isTestPaid ? L('profile-test-paid') : L('profile-test-unpaid');
+                const paidStatusText = userProfile.isTestPaid ? L('profile-test-paid') : L('profile-test-unpaid');
                 document.getElementById('test-paid-status').textContent = paidStatusText;
-                document.getElementById('test-paid-status').className = `text-sm text-center font-medium ${isTestPaid ? 'text-emerald-600' : 'text-red-600'}`;
+                document.getElementById('test-paid-status').className = `text-sm text-center font-medium ${userProfile.isTestPaid ? 'text-emerald-600' : 'text-red-600'}`;
             }
         };
 
         const saveQuizHistory = async (session) => {
-            // Prepare session for saving (questions contain user answers and state)
             const historyRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/history/${Date.now()}`);
             await set(historyRef, session);
 
-            // Update global score
             const newScore = (userProfile.score || 0) + session.score;
             const userScoreRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
             await update(userScoreRef, { score: newScore });
             userProfile.score = newScore;
-            updateProfileUI(); // Update score on dashboard
+            updateProfileUI();
         };
 
         // --- OPEN TRIVIA API FOR QUESTIONS ---
 
-        // Function to shuffle an array (Fisher-Yates)
         const shuffleArray = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -874,10 +875,9 @@
         }
 
         const fetchQuizQuestions = async (subject, difficulty, count = 10) => {
-            const categoryId = TRIVIA_CATEGORIES[subject] || 9; // Default to General
+            const categoryId = TRIVIA_CATEGORIES[subject] || 9;
             const diffParam = difficulty === 'hard' ? 'hard' : difficulty === 'medium' ? 'medium' : 'easy';
 
-            // Use Type: multiple for MCQ
             const url = `${API_URL_TRIVIA}?amount=${count}&category=${categoryId}&difficulty=${diffParam}&type=multiple`;
 
             const questionContainer = document.getElementById('quiz-question-text');
@@ -902,19 +902,19 @@
 
                     const correctIndex = allOptions.findIndex(opt => opt === correct);
 
-                    // Open Trivia questions are English only, so we duplicate English content
-                    // to fulfill the multilingual structure required by the app's rendering.
+                    // Open Trivia questions are English only, content is duplicated for multilingual placeholders
                     return {
                         question_en: decodeHtml(q.question),
-                        question_mr: decodeHtml(q.question), // Placeholder (English content)
-                        question_hi: decodeHtml(q.question), // Placeholder (English content)
+                        question_mr: decodeHtml(q.question),
+                        question_hi: decodeHtml(q.question),
                         options_en: allOptions,
-                        options_mr: allOptions, // Placeholder (English options)
-                        options_hi: allOptions, // Placeholder (English options)
+                        options_mr: allOptions,
+                        options_hi: allOptions,
                         correct_answer_index: correctIndex,
-                        explanation_en: `The correct answer is "${correct}".`, // Simple explanation
-                        explanation_mr: `योग्य उत्तर आहे: "${correct}"`,
-                        explanation_hi: `सही उत्तर है: "${correct}"`,
+                        // Simple explanation based on the correct answer
+                        explanation_en: `The correct answer is "${correct}" (Topic: ${q.category}).`,
+                        explanation_mr: `योग्य उत्तर आहे: "${correct}" (विषय: ${q.category})`,
+                        explanation_hi: `सही उत्तर है: "${correct}" (विषय: ${q.category})`,
                         attempted: false,
                         userAnswer: -1
                     };
@@ -1069,11 +1069,11 @@
         const endQuiz = () => {
             playSound('level_up');
             saveQuizHistory(quizSession);
-            renderView('result'); // FIX: Ensure this is the last step and correctly navigates.
+            renderView('result');
         };
 
         const renderResultView = () => {
-            if (!quizSession) return; // FIX: Ensure quizSession exists before rendering
+            if (!quizSession) return;
 
             const titleElement = document.getElementById('result-title');
             const scoreRing = document.getElementById('result-score-ring');
@@ -1085,7 +1085,6 @@
             const totalQ = quizSession.questions.length;
             const correctQ = quizSession.correctCount;
 
-            // Reset ring classes
             scoreRing.classList.remove('border-success', 'border-red-500', 'bg-green-100', 'bg-red-100', 'text-success', 'text-red-500');
 
             if (correctQ / totalQ > 0.7) {
@@ -1106,12 +1105,20 @@
                 .replace('{correct}', correctQ);
         };
 
-        const reviewHistoricalQuiz = (sessionData) => {
-            // Use the saved session data for review
-            quizSession = sessionData;
+        // FIX: Combined review logic into one function with source tracking
+        const openReviewScreen = (session, sourceView) => {
+            quizSession = session;
             renderView('review');
-            document.getElementById('close-review-btn').onclick = () => renderView('history');
-        }
+
+            // Set close button logic based on where the call came from
+            if (sourceView === 'history') {
+                document.getElementById('close-review-btn').onclick = () => renderView('history');
+                document.getElementById('close-review-text').textContent = L('back-to-history-text');
+            } else { // Source: result
+                document.getElementById('close-review-btn').onclick = () => renderView('result');
+                document.getElementById('close-review-text').textContent = L('close-review-text');
+            }
+        };
 
         const renderReviewView = () => {
             if (!quizSession) return;
@@ -1209,6 +1216,10 @@
                     renderHistory();
                     break;
                 case 'stage-selection':
+                    document.getElementById('bottom-nav').classList.add('hidden');
+                    document.getElementById('stage-selection-title').textContent = L('stage-selection-title');
+                    document.getElementById('stage-selection-subtitle').textContent = L('stage-selection-subtitle');
+                    break;
                 case 'quiz':
                 case 'review':
                     document.getElementById('bottom-nav').classList.add('hidden');
@@ -1221,73 +1232,65 @@
         const renderDashboard = () => {
             checkWeeklyTestStatus();
 
-            const grid = document.getElementById('subject-grid');
-            grid.innerHTML = '';
+            const mapContainer = document.getElementById('subject-stage-map');
+            mapContainer.innerHTML = '';
 
-            SUBJECTS.forEach(subject => {
-                const card = document.createElement('div');
-                card.className = `stage-card cursor-pointer p-4 bg-white rounded-2xl shadow-xl border-b-4 border-violet-500 text-center transition duration-300 hover:shadow-2xl`;
-                card.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-violet-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${getSubjectIcon(subject)}" />
-                </svg>
-                <p class="font-bold text-lg text-gray-800">${subject}</p>
-                <p class="text-sm text-gray-500">${userProfile.standard}th Std</p>
-            `;
-                card.onclick = () => renderStageSelection(subject);
-                grid.appendChild(card);
-            });
-        };
-
-        const getSubjectIcon = (subject) => {
-            switch (subject) {
-                case 'Math': return 'M7 7h10l-2 10H9l-2-10zm1-5h8M8 22h8';
-                case 'Science': return 'M9.75 17L9 20l-1.5-4H5m14.25 10c0 1.24-1.01 2.25-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V5.25C3.75 4.01 4.76 3 6 3h12a2.25 2.25 0 012.25 2.25v12.5zm-5.5-12.75v3.5h-3.5v-3.5h3.5z';
-                case 'History': return 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z';
-                case 'Geography': return 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6';
-                case 'Marathi Grammar': return 'M4 6h16M4 12h16M4 18h7';
-                default: return 'M4 6h16M4 12h16M4 18h16';
-            }
-        };
-
-        const renderStageSelection = (subject) => {
-            renderView('stage-selection');
-            const list = document.getElementById('stage-list');
-            list.innerHTML = '';
-            document.getElementById('stage-selection-title').textContent = `${L('stage-selection-title')} - ${subject}`;
-
-            let level = 1;
-
-            Object.keys(DIFFICULTIES).reverse().forEach(difficultyKey => {
-                const diff = DIFFICULTIES[difficultyKey];
-
+            // FIX: Now the Candy Crush style is applied to the Subjects (Stages)
+            SUBJECTS_DATA.reverse().forEach((subject, index) => {
                 const node = document.createElement('div');
-                node.className = 'flex flex-col items-center justify-center';
 
                 const nodeButton = document.createElement('button');
-                nodeButton.className = `stage-node ${diff.color} w-20 h-20 text-xl`;
+                nodeButton.className = `subject-node ${subject.color} w-24 h-24 text-xl`;
                 nodeButton.innerHTML = `
-                <div class="text-center">
-                    <span class="block">${L(difficultyKey)}</span>
-                    <span class="text-xs opacity-80">Level ${level}</span>
+                <div class="text-center p-1">
+                    <span class="text-3xl block">${subject.emoji}</span>
+                    <span class="text-xs font-semibold">${subject.name}</span>
                 </div>
             `;
-                nodeButton.onclick = () => startQuiz(subject, difficultyKey, false);
+                nodeButton.onclick = () => renderDifficultySelection(subject.name);
 
                 const container = document.createElement('div');
                 container.className = 'stage-node-container relative flex flex-col items-center';
-                container.style.marginTop = `${level === 1 ? '0' : '60px'}`;
+                container.style.marginTop = `${index === 0 ? '0' : '40px'}`; // Space between nodes
 
-                // Add the path styling
-                if (level > 1) {
+                // Add the path line before the node, except for the first one
+                if (index < SUBJECTS_DATA.length - 1) {
                     const path = document.createElement('div');
-                    path.className = 'absolute top-[-60px] w-1 h-12 bg-gray-400 z-5';
+                    path.className = 'absolute top-[-40px] w-2 h-10 bg-gray-400 z-5';
                     container.appendChild(path);
                 }
 
                 container.appendChild(nodeButton);
-                list.prepend(container); // Prepend to show reverse order (Hard at the top)
-                level++;
+                mapContainer.prepend(container); // Prepend to build map from bottom up (visually)
+            });
+            SUBJECTS_DATA.reverse(); // Reverse back for consistent array use
+        };
+
+        // This is now the Difficulty Selection Screen (Levels)
+        const renderDifficultySelection = (subject) => {
+            renderView('stage-selection');
+            const list = document.getElementById('stage-list');
+            list.innerHTML = '';
+            document.getElementById('stage-selection-title').textContent = `${L('stage-selection-title')} - ${subject}`;
+            document.getElementById('stage-selection-subtitle').textContent = L('stage-selection-subtitle');
+
+            // Simple button list for levels/difficulty
+            Object.keys(DIFFICULTIES).forEach(difficultyKey => {
+                const diff = DIFFICULTIES[difficultyKey];
+                const card = document.createElement('button');
+                card.className = `w-full p-5 ${diff.color} text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300 transform hover:scale-[1.03]`;
+                card.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="text-3xl">${diff.emoji}</div>
+                    <div>
+                         <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
+                         <p class="font-semibold text-sm opacity-90">${subject}</p>
+                    </div>
+                </div>
+                <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Score Multiplier: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
+            `;
+                card.onclick = () => startQuiz(subject, difficultyKey, false);
+                list.appendChild(card);
             });
         };
 
@@ -1302,7 +1305,7 @@
 
             testCard.classList.add('hidden');
             isWeeklyTestAvailable = false;
-            isTestPaid = userProfile.isTestPaid; // Load latest status
+            isTestPaid = userProfile.isTestPaid;
 
             const cardBtn = document.getElementById('test-card-btn');
             document.getElementById('test-card-title').textContent = L('test-card-title');
@@ -1312,18 +1315,17 @@
                 testCard.classList.remove('hidden');
 
                 if (isTestPaid) {
-                    // Test is enabled and paid
-                    document.getElementById('test-card-status').textContent = L('test-card-status-active');
+                    testCard.classList.replace('bg-gray-400', 'bg-yellow-400');
+                    testCard.classList.replace('border-gray-600', 'border-yellow-600');
+                    document.getElementById('test-card-status').textContent = L('test-card-status-paid');
                     cardBtn.textContent = L('test-card-btn-start');
                     testCard.onclick = () => startQuiz('Weekly Test', 'hard', true);
                 } else {
-                    // Test is enabled but needs payment
                     document.getElementById('test-card-status').textContent = L('test-card-status-pay');
                     cardBtn.textContent = L('test-card-btn-pay');
                     testCard.onclick = () => showPaymentModal();
                 }
             } else {
-                // Test is not available today
                 testCard.classList.remove('hidden');
                 testCard.classList.replace('bg-yellow-400', 'bg-gray-400');
                 testCard.classList.replace('border-yellow-600', 'border-gray-600');
@@ -1339,13 +1341,11 @@
                 L('modal-pay-message'),
                 true,
                 () => {
-                    // MOCK PAYMENT SUCCESS: Simulates Razorpay redirect/callback after a short delay
                     const modal = document.getElementById('global-modal');
-                    modal.classList.add('hidden'); // Hide confirmation modal
+                    modal.classList.add('hidden');
                     showModal('Processing Payment...', 'Simulating transaction for ₹9.00. Please wait...', false);
 
                     setTimeout(async () => {
-                        // Update user profile in database
                         const userRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
                         await update(userRef, { isTestPaid: true });
 
@@ -1353,8 +1353,8 @@
                         userProfile.isTestPaid = true;
 
                         showModal('Success!', 'Payment successful. All weekly tests are now unlocked permanently!', false);
-                        checkWeeklyTestStatus(); // Update card to START
-                        updateProfileUI(); // Update profile status
+                        checkWeeklyTestStatus();
+                        updateProfileUI();
                     }, 2000);
                 }
             );
@@ -1394,12 +1394,12 @@
                 const rank = index + 1;
                 const rankColor = rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-700' : 'text-gray-600';
                 const card = document.createElement('div');
-                card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01]`;
+                card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01] border-b-2 border-violet-200`;
 
                 card.innerHTML = `
                 <div class="flex items-center space-x-3">
                     <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
-                    <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" alt="Profile">
+                    <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
                     <div>
                         <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name}</p>
                         <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
@@ -1436,11 +1436,13 @@
             historyList.forEach(session => {
                 const date = new Date(session.startTime).toLocaleDateString(currentLanguage === 'mr' ? 'mr-IN' : currentLanguage === 'hi' ? 'hi-IN' : 'en-US');
                 const colorClass = session.correctCount > (session.questions.length / 2) ? 'bg-emerald-50' : 'bg-red-50';
+                const statusEmoji = session.correctCount > (session.questions.length / 2) ? '🥳' : '✍️';
+
                 const card = document.createElement('div');
                 card.className = `p-4 ${colorClass} rounded-xl shadow-lg space-y-2 border-l-4 border-violet-500 cursor-pointer transition duration-200 hover:shadow-xl`;
 
-                // FIX: Add click handler to review the history session
-                card.onclick = () => reviewHistoricalQuiz(session);
+                // FIX: Add click handler to review the history session, specifying source is 'history'
+                card.onclick = () => openReviewScreen(session, 'history');
 
                 card.innerHTML = `
                 <div class="flex justify-between items-center">
@@ -1448,7 +1450,7 @@
                     <span class="text-sm text-gray-500">${date}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="font-semibold text-violet-600">Score: ${session.score}</span>
+                    <span class="font-semibold text-violet-600">Score: ${session.score} ${statusEmoji}</span>
                     <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${session.questions.length}</span>
                 </div>
             `;
@@ -1505,10 +1507,13 @@
             document.getElementById('profile-setup-form').addEventListener('submit', saveProfile);
             document.getElementById('quiz-next-btn').addEventListener('click', nextQuestion);
             document.getElementById('back-to-dashboard-btn').addEventListener('click', () => renderView('dashboard'));
-            document.getElementById('review-answers-btn').addEventListener('click', () => reviewHistoricalQuiz(quizSession)); // Pass current quizSession for review
-            document.getElementById('close-review-btn').addEventListener('click', () => renderView('result')); // Default close goes back to result view
+
+            // FIX: Review button now uses the dynamic logic function, setting source to 'result'
+            document.getElementById('review-answers-btn').addEventListener('click', () => openReviewScreen(quizSession, 'result'));
+
             document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
 
+            // Language Chooser Listener is attached to the element now located in dashboard view
             document.getElementById('lang-select').addEventListener('change', (e) => {
                 currentLanguage = e.target.value;
                 localStorage.setItem('smartkid_lang', currentLanguage);
