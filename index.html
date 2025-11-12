@@ -287,6 +287,13 @@
                                 <option value="State">State Board (राज्य मंडळ)</option>
                             </select>
                         </div>
+                        <!-- NEW: School Name Input -->
+                        <div>
+                            <label id="label-school" for="user-school"
+                                class="block text-sm font-medium text-gray-700">School Name (शाळेचे नाव)</label>
+                            <input type="text" id="user-school" required placeholder="E.g., Vidya Mandir High School"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 focus:border-violet-500 focus:ring-violet-500">
+                        </div>
                         <button id="save-profile-btn" type="submit"
                             class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                             <span id="save-profile-text">Save Profile</span>
@@ -440,13 +447,22 @@
                             alt="Profile Picture">
                         <p id="profile-user-name" class="text-2xl font-bold text-center"></p>
                         <p id="profile-user-id" class="text-xs text-gray-500 text-center truncate"></p>
-                        <div id="profile-details" class="space-y-2">
+
+                        <!-- Updated Profile Details -->
+                        <div id="profile-details" class="space-y-2 border-t pt-4">
+                            <p id="profile-school" class="text-gray-700"><span class="font-semibold">School:</span></p>
                             <p id="profile-standard" class="text-gray-700"><span class="font-semibold">Standard:</span>
-                                10th</p>
-                            <p id="profile-medium" class="text-gray-700"><span class="font-semibold">Medium:</span> CBSE
                             </p>
+                            <p id="profile-medium" class="text-gray-700"><span class="font-semibold">Medium:</span></p>
                         </div>
-                        <p id="test-paid-status" class="text-sm text-center font-medium"></p>
+
+                        <!-- Updated Premium Status Section -->
+                        <div id="premium-status-details" class="space-y-2 border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 text-center">Premium Access</h4>
+                            <p id="profile-weekly-status" class="text-sm text-center font-medium"></p>
+                            <p id="profile-scholarship-status" class="text-sm text-center font-medium"></p>
+                            <p id="profile-navodaya-status" class="text-sm text-center font-medium"></p>
+                        </div>
                     </div>
                     <button id="sign-out-btn"
                         class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
@@ -633,8 +649,13 @@
         let userProfile = null;
         let quizSession = null; // Holds current or last completed quiz session data
         let currentLanguage = 'mr';
-        let isWeeklyTestAvailable = false;
-        let isTestPaid = false;
+
+        // UPDATED: Replaced single boolean with an object
+        let premiumStatus = {
+            isWeeklyPaid: false,
+            isScholarshipPaid: false,
+            isNavodayaPaid: false
+        };
 
         // NEW: Store current exam context
         let currentExamType = null;
@@ -676,6 +697,7 @@
             'label-age': { en: 'Age (वय)', mr: 'वय (Age)', hi: 'आयु (Age)' },
             'label-standard': { en: 'Standard (इयत्ता)', mr: 'इयत्ता (Standard)', hi: 'कक्षा (Standard)' },
             'label-medium': { en: 'Medium (माध्यम)', mr: 'माध्यम (Medium)', hi: 'माध्यम (Medium)' },
+            'label-school': { en: 'School Name (शाळेचे नाव)', mr: 'शाळेचे नाव (School Name)', hi: 'विद्यालय का नाम (School Name)' },
             'save-profile-text': { en: 'Save Profile & Start', mr: 'प्रोफाइल जतन करा आणि सुरू करा', hi: 'प्रोफ़ाइल सहेजें और शुरू करें' },
             'nav-dashboard-text': { en: 'Dashboard', mr: 'डॅशबोर्ड', hi: 'डैशबोर्ड' },
             'nav-leaderboard-text': { en: 'Leaderboard', mr: 'लीडरबोर्ड', hi: 'लीडरबोर्ड' },
@@ -708,13 +730,16 @@
             'back-to-history-text': { en: 'Back to History', mr: 'इतिहासावर परत', hi: 'इतिहास पर वापस' },
             'profile-page-title': { en: 'Your Profile', mr: 'तुमची प्रोफाइल', hi: 'आपकी प्रोफ़ाइल' },
             'sign-out-text': { en: 'Sign Out', mr: 'साइन आउट करा', hi: 'साइन आउट करें' },
+
+            // Weekly Test Texts
             'test-card-title': { en: 'Weekly Scholar Test', mr: 'साप्ताहिक स्कॉलर चाचणी', hi: 'साप्ताहिक स्कॉलर टेस्ट' },
             'test-card-status-inactive': { en: 'Next test: Sunday!', mr: 'पुढची चाचणी: रविवार!', hi: 'अगला टेस्ट: रविवार!' },
             'test-card-status-active': { en: 'Test is Live! Click to Start.', mr: 'चाचणी लाईव्ह आहे! सुरू करण्यासाठी क्लिक करा.', hi: 'टेस्ट लाइव है! शुरू करने के लिए क्लिक करें.' },
-            'test-card-status-paid': { en: 'Premium Access: UNLOCKED! ✅', mr: 'प्रीमियम प्रवेश: अनलॉक झाला! ✅', hi: 'प्रीमियम एक्सेस: अनलॉक! ✅' },
-            'test-card-status-pay': { en: 'Unlock all Premium Tests!', mr: 'सर्व प्रीमियम चाचण्या अनलॉक करा!', hi: 'सभी प्रीमियम टेस्ट अनलॉक करें!' },
+            'test-card-status-paid': { en: 'Weekly Test: UNLOCKED! ✅', mr: 'साप्ताहिक चाचणी: अनलॉक झाली! ✅', hi: 'साप्ताहिक टेस्ट: अनलॉक! ✅' },
+            'test-card-status-pay': { en: 'Unlock the Weekly Test!', mr: 'साप्ताहिक चाचणी अनलॉक करा!', hi: 'साप्ताहिक टेस्ट अनलॉक करें!' },
             'test-card-btn-start': { en: 'START TEST', mr: 'चाचणी सुरू करा', hi: 'टेस्ट शुरू करें' },
             'test-card-btn-pay': { en: 'UNLOCK NOW', mr: 'आता अनलॉक करा', hi: 'अभी अनलॉक करें' },
+
             'leaderboard-title': { en: 'Global Top Scorers 🏆', mr: 'जागतिक टॉप स्कोअरर्स 🏆', hi: 'वैश्विक टॉप स्कोरर 🏆' },
             'history-title': { en: 'My Quiz History 📜', mr: 'माझा क्विझ इतिहास 📜', hi: 'मेरा क्विज़ इतिहास 📜' },
             'history-loading': { en: 'Loading history...', mr: 'इतिहास लोड होत आहे...', hi: 'इतिहास लोड हो रहा है...' },
@@ -722,13 +747,26 @@
             'question-loading': { en: 'Fetching Questions...', mr: 'प्रश्न आणले जात आहेत...', hi: 'प्रश्न प्राप्त किए जा रहे हैं...' },
             'question-generating-error': { en: 'Could not fetch questions. Try again.', mr: 'प्रश्न मिळू शकले नाही. पुन्हा प्रयत्न करा.', hi: 'प्रश्न प्राप्त नहीं हो सके। पुनः प्रयास करें.' },
 
-            // UPDATED Modal Texts
-            'modal-pay-title': { en: 'Unlock Premium Access', mr: 'प्रीमियम प्रवेश अनलॉक करा', hi: 'प्रीमियम एक्सेस अनलॉक करें' },
-            'modal-pay-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock <b>ALL</b> premium exams (Scholarship, Navodaya, Weekly Tests) permanently. (Razorpay Simulation)', mr: '<b>सर्व</b> प्रीमियम परीक्षा (शिष्यवृत्ती, नवोदय, साप्ताहिक चाचण्या) कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा. (Razorpay अनुकरण)', hi: '<b>सभी</b> प्रीमियम परीक्षा (छात्रवृत्ति, नवोदय, साप्ताहिक टेस्ट) को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें। (Razorpay सिमुलेशन)' },
+            // UPDATED Modal Texts for specific payments
+            'modal-pay-weekly-title': { en: 'Unlock Weekly Test', mr: 'साप्ताहिक चाचणी अनलॉक करा', hi: 'साप्ताहिक टेस्ट अनलॉक करें' },
+            'modal-pay-weekly-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock <b>ALL</b> future Weekly Tests permanently. (Razorpay Simulation)', mr: '<b>सर्व</b> भविष्यातील साप्ताहिक चाचण्या कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा. (Razorpay अनुकरण)', hi: '<b>सभी</b> भावी साप्ताहिक टेस्ट को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें। (Razorpay सिमुलेशन)' },
+
+            'modal-pay-scholarship-title': { en: 'Unlock Scholarship Exams', mr: 'शिष्यवृत्ती परीक्षा अनलॉक करा', hi: 'छात्रवृत्ति परीक्षा अनलॉक करें' },
+            'modal-pay-scholarship-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock <b>ALL</b> Scholarship Exams permanently. (Razorpay Simulation)', mr: '<b>सर्व</b> शिष्यवृत्ती परीक्षा कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा. (Razorpay अनुकरण)', hi: '<b>सभी</b> छात्रवृत्ति परीक्षाओं को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें। (Razorpay सिमुलेशन)' },
+
+            'modal-pay-navodaya-title': { en: 'Unlock Navodaya Exams', mr: 'नवोदय परीक्षा अनलॉक करा', hi: 'नवोदय परीक्षा अनलॉक करें' },
+            'modal-pay-navodaya-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock <b>ALL</b> Navodaya Exams permanently. (Razorpay Simulation)', mr: '<b>सर्व</b> नवोदय परीक्षा कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा. (Razorpay अनुकरण)', hi: '<b>सभी</b> नवोदय परीक्षाओं को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें। (Razorpay सिमुलेशन)' },
 
             'review-explanation-text': { en: 'Correct Answer Explanation', mr: 'योग्य उत्तराचे स्पष्टीकरण', hi: 'सही उत्तर का स्पष्टीकरण' },
-            'profile-test-paid': { en: 'Premium Access: PAID (Unlocked PermanTAINLY) 🎉', mr: 'प्रीमियम प्रवेश: सशुल्क (कायमस्वरूपी अनलॉक) 🎉', hi: 'प्रीमियम एक्सेस: भुगतान किया गया (स्थायी रूप से अनलॉक) 🎉' },
-            'profile-test-unpaid': { en: 'Premium Access: UNPAID 🔒', mr: 'प्रीमियम प्रवेश: सशुल्क नाही 🔒', hi: 'प्रीमियम एक्सेस: भुगतान नहीं किया गया 🔒' },
+
+            // UPDATED Profile Status Texts
+            'profile-weekly-paid': { en: 'Weekly Tests: UNLOCKED 🎉', mr: 'साप्ताहिक चाचण्या: अनलॉक 🎉', hi: 'साप्ताहिक टेस्ट: अनलॉक 🎉' },
+            'profile-weekly-unpaid': { en: 'Weekly Tests: LOCKED 🔒', mr: 'साप्ताहिक चाचण्या: लॉक 🔒', hi: 'साप्ताहिक टेस्ट: लॉक 🔒' },
+            'profile-scholarship-paid': { en: 'Scholarship Exams: UNLOCKED 🎉', mr: 'शिष्यवृत्ती परीक्षा: अनलॉक 🎉', hi: 'छात्रवृत्ति परीक्षा: अनलॉक 🎉' },
+            'profile-scholarship-unpaid': { en: 'Scholarship Exams: LOCKED 🔒', mr: 'शिष्यवृत्ती परीक्षा: लॉक 🔒', hi: 'छात्रवृत्ति परीक्षा: लॉक 🔒' },
+            'profile-navodaya-paid': { en: 'Navodaya Exams: UNLOCKED 🎉', mr: 'नवोदय परीक्षा: अनलॉक 🎉', hi: 'नवोदय परीक्षा: अनलॉक 🎉' },
+            'profile-navodaya-unpaid': { en: 'Navodaya Exams: LOCKED 🔒', mr: 'नवोदय परीक्षा: लॉक 🔒', hi: 'नवोदय परीक्षा: लॉक 🔒' },
+
             'translation-note': { en: '(Question translated from English, content might be imprecise.)', mr: '(प्रश्न इंग्रजीतून अनुवादित, सामग्री अचूक नसू शकते.)', hi: '(प्रश्न अंग्रेजी से अनूदित, सामग्री अपriष्कृत हो सकती है।)' }
         };
 
@@ -757,7 +795,7 @@
         const localizeElements = () => {
             const elements = [
                 'login-welcome', 'login-tagline', 'google-sign-in-text', 'setup-title', 'setup-tagline',
-                'label-age', 'label-standard', 'label-medium', 'save-profile-text',
+                'label-age', 'label-standard', 'label-medium', 'label-school', 'save-profile-text',
                 'nav-dashboard-text', 'nav-leaderboard-text', 'nav-history-text', 'nav-profile-text',
                 'exam-type-heading', 'stage-selection-title', 'stage-selection-subtitle',
                 'subject-selection-title', 'paper-selection-title',
@@ -852,16 +890,50 @@
 
             if (snapshot.exists()) {
                 userProfile = snapshot.val();
-                if (typeof userProfile.isTestPaid === 'undefined') {
-                    userProfile.isTestPaid = false;
-                    await update(userRef, { isTestPaid: false });
+                let needsUpdate = false;
+
+                // --- Migration logic for new payment booleans ---
+                if (typeof userProfile.isWeeklyPaid === 'undefined') {
+                    // Check old boolean 'isTestPaid' for migration
+                    userProfile.isWeeklyPaid = userProfile.isTestPaid || false;
+                    needsUpdate = true;
                 }
-                if (!userProfile.standard || !userProfile.medium) {
+                if (typeof userProfile.isScholarshipPaid === 'undefined') {
+                    userProfile.isScholarshipPaid = userProfile.isTestPaid || false; // Migrate old users
+                    needsUpdate = true;
+                }
+                if (typeof userProfile.isNavodayaPaid === 'undefined') {
+                    userProfile.isNavodayaPaid = userProfile.isTestPaid || false; // Migrate old users
+                    needsUpdate = true;
+                }
+
+                if (needsUpdate) {
+                    // Clean up old 'isTestPaid' field if it exists
+                    const updates = {
+                        isWeeklyPaid: userProfile.isWeeklyPaid,
+                        isScholarshipPaid: userProfile.isScholarshipPaid,
+                        isNavodayaPaid: userProfile.isNavodayaPaid,
+                        isTestPaid: null // Remove the old field
+                    };
+                    await update(userRef, updates);
+                }
+                // --- End Migration ---
+
+                // Check for core profile info
+                if (!userProfile.standard || !userProfile.medium || !userProfile.schoolName) {
                     currentUser = user;
+                    // Pre-fill form with existing data
+                    if (userProfile.age) document.getElementById('user-age').value = userProfile.age;
+                    if (userProfile.standard) document.getElementById('user-standard').value = userProfile.standard;
+                    if (userProfile.medium) document.getElementById('user-medium').value = userProfile.medium;
+                    if (userProfile.schoolName) document.getElementById('user-school').value = userProfile.schoolName;
                     renderView('profile-setup');
                 } else {
                     currentUser = user;
-                    isTestPaid = userProfile.isTestPaid;
+                    // Populate global premium status
+                    premiumStatus.isWeeklyPaid = userProfile.isWeeklyPaid;
+                    premiumStatus.isScholarshipPaid = userProfile.isScholarshipPaid;
+                    premiumStatus.isNavodayaPaid = userProfile.isNavodayaPaid;
                     renderView('dashboard');
                 }
             } else {
@@ -877,8 +949,9 @@
             const age = document.getElementById('user-age').value;
             const standard = document.getElementById('user-standard').value;
             const medium = document.getElementById('user-medium').value;
+            const schoolName = document.getElementById('user-school').value; // Get new value
 
-            if (!age || !standard || !medium) return;
+            if (!age || !standard || !medium || !schoolName) return;
 
             const newProfile = {
                 name: currentUser.displayName || 'Smart Kid User',
@@ -887,15 +960,24 @@
                 age: parseInt(age),
                 standard: standard,
                 medium: medium,
+                schoolName: schoolName, // Save new value
                 score: userProfile?.score || 0,
-                isTestPaid: userProfile?.isTestPaid || false,
+                // Initialize new payment fields
+                isWeeklyPaid: userProfile?.isWeeklyPaid || false,
+                isScholarshipPaid: userProfile?.isScholarshipPaid || false,
+                isNavodayaPaid: userProfile?.isNavodayaPaid || false,
                 lastUpdated: Date.now()
             };
 
             const profileRef = ref(window.db, `artifacts/${window.appId}/users/${currentUser.uid}/profile`);
             await set(profileRef, newProfile);
             userProfile = newProfile;
-            isTestPaid = userProfile.isTestPaid;
+
+            // Update global state
+            premiumStatus.isWeeklyPaid = userProfile.isWeeklyPaid;
+            premiumStatus.isScholarshipPaid = userProfile.isScholarshipPaid;
+            premiumStatus.isNavodayaPaid = userProfile.isNavodayaPaid;
+
             viewHistory = [];
             renderView('dashboard');
         };
@@ -909,12 +991,25 @@
                 document.getElementById('profile-page-img').src = userProfile.photoURL;
                 document.getElementById('profile-user-name').textContent = userProfile.name;
                 document.getElementById('profile-user-id').textContent = `User ID: ${window.userId}`;
+
+                // Display new School Name
+                document.getElementById('profile-school').innerHTML = `<span class="font-semibold">${L('label-school')}:</span> ${userProfile.schoolName || 'N/A'}`;
                 document.getElementById('profile-standard').innerHTML = `<span class="font-semibold">${L('label-standard')}:</span> ${userProfile.standard}th`;
                 document.getElementById('profile-medium').innerHTML = `<span class="font-semibold">${L('label-medium')}:</span> ${userProfile.medium}`;
 
-                const paidStatusText = userProfile.isTestPaid ? L('profile-test-paid') : L('profile-test-unpaid');
-                document.getElementById('test-paid-status').textContent = paidStatusText;
-                document.getElementById('test-paid-status').className = `text-sm text-center font-medium ${userProfile.isTestPaid ? 'text-emerald-600' : 'text-red-600'}`;
+                // Update all three premium statuses
+                const weeklyStatusEl = document.getElementById('profile-weekly-status');
+                const scholarshipStatusEl = document.getElementById('profile-scholarship-status');
+                const navodayaStatusEl = document.getElementById('profile-navodaya-status');
+
+                weeklyStatusEl.textContent = userProfile.isWeeklyPaid ? L('profile-weekly-paid') : L('profile-weekly-unpaid');
+                weeklyStatusEl.className = `text-sm text-center font-medium ${userProfile.isWeeklyPaid ? 'text-emerald-600' : 'text-red-600'}`;
+
+                scholarshipStatusEl.textContent = userProfile.isScholarshipPaid ? L('profile-scholarship-paid') : L('profile-scholarship-unpaid');
+                scholarshipStatusEl.className = `text-sm text-center font-medium ${userProfile.isScholarshipPaid ? 'text-emerald-600' : 'text-red-600'}`;
+
+                navodayaStatusEl.textContent = userProfile.isNavodayaPaid ? L('profile-navodaya-paid') : L('profile-navodaya-unpaid');
+                navodayaStatusEl.className = `text-sm text-center font-medium ${userProfile.isNavodayaPaid ? 'text-emerald-600' : 'text-red-600'}`;
             }
         };
 
@@ -1421,13 +1516,14 @@
 
             const examTypes = [
                 { id: 'regular', name: L('exam-regular'), emoji: '📚', color: 'bg-blue-500', isPremium: false },
-                { id: 'scholarship', name: L('exam-scholarship'), emoji: '🎓', color: 'bg-green-500', isPremium: true },
-                { id: 'navodaya', name: L('exam-navodaya'), emoji: '🏫', color: 'bg-orange-500', isPremium: true },
+                { id: 'scholarship', name: L('exam-scholarship'), emoji: '🎓', color: 'bg-green-500', isPremium: true, premiumKey: 'isScholarshipPaid' },
+                { id: 'navodaya', name: L('exam-navodaya'), emoji: '🏫', color: 'bg-orange-500', isPremium: true, premiumKey: 'isNavodayaPaid' },
             ];
 
             examTypes.forEach((exam) => {
                 const card = document.createElement('button');
-                const isLocked = exam.isPremium && !isTestPaid;
+                // Check the specific premium key
+                const isLocked = exam.isPremium && !premiumStatus[exam.premiumKey];
 
                 card.className = `p-4 h-32 ${exam.color} ${isLocked ? 'opacity-70' : ''} text-white rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 font-bold transition duration-300 transform ${isLocked ? 'cursor-not-allowed' : 'hover:scale-[1.03] exam-card'}`;
                 card.innerHTML = `
@@ -1437,11 +1533,10 @@
                 `;
 
                 if (isLocked) {
-                    card.onclick = () => showPaymentModal(() => renderSubjectSelection(exam.id)); // Pay then proceed
-                } else if (exam.id === 'regular') {
-                    card.onclick = () => renderSubjectSelection('regular');
+                    // Pass the exam type ('scholarship' or 'navodaya') to the payment modal
+                    card.onclick = () => showPaymentModal(exam.id, () => renderSubjectSelection(exam.id)); // Pay then proceed
                 } else {
-                    card.onclick = () => renderSubjectSelection(exam.id); // Scholarship or Navodaya (paid)
+                    card.onclick = () => renderSubjectSelection(exam.id);
                 }
 
                 gridContainer.appendChild(card);
@@ -1615,8 +1710,7 @@
             const isTestEnabledByAdmin = isSunday;
 
             testCard.classList.add('hidden');
-            isWeeklyTestAvailable = false;
-            isTestPaid = userProfile?.isTestPaid || false;
+            let isWeeklyTestAvailable = false; // Local scope
 
             const cardBtn = document.getElementById('test-card-btn');
             document.getElementById('test-card-title').textContent = L('test-card-title');
@@ -1626,7 +1720,9 @@
                 isWeeklyTestAvailable = true;
                 testCard.classList.remove('hidden');
                 testCard.classList.add('bg-yellow-400', 'border-yellow-600');
-                if (isTestPaid) {
+
+                // Check the specific boolean from global state
+                if (premiumStatus.isWeeklyPaid) {
                     document.getElementById('test-card-status').textContent = L('test-card-status-paid');
                     document.getElementById('test-card-status').className = 'text-sm text-yellow-700';
                     cardBtn.textContent = L('test-card-btn-start');
@@ -1635,7 +1731,8 @@
                     document.getElementById('test-card-status').textContent = L('test-card-status-pay');
                     document.getElementById('test-card-status').className = 'text-sm text-red-700 font-semibold';
                     cardBtn.textContent = L('test-card-btn-pay');
-                    testCard.onclick = () => showPaymentModal(() => {
+                    // Pass 'weekly' as the exam type
+                    testCard.onclick = () => showPaymentModal('weekly', () => {
                         // On successful payment, auto-start the weekly test
                         startQuiz('Weekly Test (Premium)', 'hard', true);
                     });
@@ -1650,27 +1747,58 @@
             }
         };
 
-        const showPaymentModal = (onConfirmCallback = () => { }) => {
+        // --- REFACTORED PAYMENT MODAL ---
+        const showPaymentModal = (examType, onConfirmCallback = () => { }) => {
+            // Determine which texts and db key to use
+            let titleKey = '';
+            let messageKey = '';
+            let dbKey = '';
+
+            if (examType === 'weekly') {
+                titleKey = 'modal-pay-weekly-title';
+                messageKey = 'modal-pay-weekly-message';
+                dbKey = 'isWeeklyPaid';
+            } else if (examType === 'scholarship') {
+                titleKey = 'modal-pay-scholarship-title';
+                messageKey = 'modal-pay-scholarship-message';
+                dbKey = 'isScholarshipPaid';
+            } else if (examType === 'navodaya') {
+                titleKey = 'modal-pay-navodaya-title';
+                messageKey = 'modal-pay-navodaya-message';
+                dbKey = 'isNavodayaPaid';
+            } else {
+                console.error("Unknown examType for payment modal:", examType);
+                return;
+            }
+
             showModal(
-                L('modal-pay-title'),
-                L('modal-pay-message'),
+                L(titleKey),
+                L(messageKey),
                 true,
                 () => { // onConfirm
                     const modal = document.getElementById('global-modal');
                     modal.classList.add('hidden');
                     showModal('Processing Payment...', 'Simulating transaction for ₹9.00 via Razorpay... Please wait.', false);
+
                     setTimeout(async () => {
                         const userRef = ref(window.db, `artifacts/${window.appId}/users/${window.userId}/profile`);
-                        await update(userRef, { isTestPaid: true });
-                        isTestPaid = true;
-                        userProfile.isTestPaid = true;
+
+                        // Update the specific boolean in Firebase
+                        let updates = {};
+                        updates[dbKey] = true;
+                        await update(userRef, updates);
+
+                        // Update local state
+                        premiumStatus[dbKey] = true;
+                        userProfile[dbKey] = true;
+
                         document.getElementById('global-modal').classList.add('hidden');
-                        showModal('Success! 🎉', 'Payment successful. All premium content is now unlocked permanently!', false);
+                        showModal('Success! 🎉', 'Payment successful. This content is now unlocked permanently!', false);
 
                         // Update UI
-                        checkWeeklyTestStatus();
+                        checkWeeklyTestStatus(); // Refreshes weekly card
                         renderDashboard(); // Re-render dashboard to unlock cards
-                        updateProfileUI();
+                        updateProfileUI(); // Updates profile page
 
                         // Execute the callback (e.g., proceed to subject selection)
                         onConfirmCallback();
@@ -1701,17 +1829,22 @@
             }
             leaderboard.sort((a, b) => (b.score || 0) - (a.score || 0));
             list.innerHTML = '';
+
+            // Check for premium status to show badge
+            const hasPremium = (user) => user.isWeeklyPaid || user.isScholarshipPaid || user.isNavodayaPaid;
+
             leaderboard.slice(0, 10).forEach((user, index) => {
                 const rank = index + 1;
                 const rankColor = rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-700' : 'text-gray-600';
                 const card = document.createElement('div');
-                card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01] border-b-2 ${user.isTestPaid ? 'border-yellow-400' : 'border-violet-200'}`;
+                // Show a yellow border if user has *any* premium access
+                card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01] border-b-2 ${hasPremium(user) ? 'border-yellow-400' : 'border-violet-200'}`;
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
                         <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
                         <div>
-                            <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${user.isTestPaid ? '⭐' : ''}</p>
+                            <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${hasPremium(user) ? '⭐' : ''}</p>
                             <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
                         </div>
                     </div>
