@@ -129,6 +129,36 @@
             pointer-events: none;
         }
 
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 1s ease-in-out forwards;
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 1s ease-in-out forwards;
+        }
+
         /* Keep existing hidden utility (Tailwind 'hidden') is used to remove element from layout after fade */
     </style>
 </head>
@@ -137,12 +167,57 @@
 
     <div class="mobile-frame">
 
-        <!-- Splash screen for loading (IMPROVED: will fade out smoothly) -->
-        <div id="splash" class="absolute inset-0 flex flex-col items-center justify-center bg-violet-700 z-50">
-            <div class="text-4xl font-extrabold text-white animate-pulse">Smart Kid</div>
-            <p class="text-white mt-2 text-sm">लोड होत आहे... (Loading...)</p>
-            <div class="loader mt-4"></div>
+        <!-- === SPLASH SCREEN (Improved) === -->
+        <div id="splash"
+            class="absolute inset-0 flex flex-col items-center justify-center text-white bg-gradient-to-br from-violet-600 via-indigo-500 to-blue-500 z-50 overflow-hidden">
+            <div class="relative flex flex-col items-center">
+                <!-- Glow behind logo -->
+                <div class="absolute w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+                <h1 class="text-5xl sm:text-6xl font-extrabold drop-shadow-lg tracking-wide animate-bounce">Smart Kid
+                </h1>
+                <p class="mt-4 text-lg opacity-90 animate-fade-in">Loading your learning world...</p>
+
+                <!-- Fancy Loader Bar -->
+                <div class="w-64 h-2 mt-8 bg-white/30 rounded-full overflow-hidden">
+                    <div id="loader-bar" class="h-full bg-white w-0 rounded-full transition-all duration-700 ease-out">
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- === LOGIN SCREEN (Improved) === -->
+        <section id="login-view"
+            class="hidden relative flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 px-4">
+            <div
+                class="flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl transform transition duration-500 scale-95 md:scale-100">
+
+                <!-- Illustration (hidden on very small devices) -->
+                <div
+                    class="hidden md:flex md:w-1/2  items-center justify-center relative">
+                    <img src="/kidsmartlogo.png"
+                        alt="Smart Learning Illustration" class="w-80 drop-shadow-2xl animate-fade-in-up" />
+                </div>
+
+                <!-- Form side -->
+                <div class="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center space-y-6">
+                    <div>
+                        <h2 class="text-4xl font-extrabold text-violet-700 mb-2">Welcome to Smart Kid!</h2>
+                        <p class="text-gray-600">Learn, play, and grow with fun quizzes 🎓</p>
+                    </div>
+
+                    <!-- Google sign-in button -->
+                    <button id="google-sign-in-btn"
+                        class="w-full max-w-xs flex items-center justify-center gap-3 py-3 px-4 bg-white rounded-full shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 border border-gray-200">
+                        <img class="w-6 h-6" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                            alt="Google logo" />
+                        <span class="text-gray-700 font-semibold">Sign in with Google</span>
+                    </button>
+
+                    <p class="text-xs text-gray-400">By signing in, you agree to our Terms & Privacy.</p>
+                </div>
+            </div>
+        </section>
+
 
         <!-- Main App Container -->
         <div id="main-app-container" class="h-full flex flex-col hidden">
@@ -174,34 +249,6 @@
 
             <!-- Main scrolling content area -->
             <main id="content-area" class="flex-grow overflow-y-auto p-4 pb-20">
-
-                <!-- Login View -->
-                <section id="login-view"
-                    class="h-full flex flex-col items-center justify-center text-center space-y-8 hidden">
-                    <h2 id="login-welcome" class="text-3xl font-extrabold text-violet-700"></h2>
-                    <p id="login-tagline" class="text-gray-600 text-lg"></p>
-
-                    <!-- IMPROVED GOOGLE SIGN-IN BUTTON (keeps id so JS continues to work) -->
-                    <button id="google-sign-in-btn"
-                        class="w-full max-w-xs flex items-center justify-center space-x-3 py-3 px-4 rounded-full shadow-lg bg-white hover:shadow-xl transform transition duration-200">
-                        <!-- Stylized Google 'G' inline SVG to keep visual crispness -->
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white">
-                            <svg class="w-5 h-5" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg"
-                                focusable="false">
-                                <path fill="#4285F4"
-                                    d="M533.5 278.4c0-18.6-1.5-37.1-4.6-54.8H272v103.8h147.2c-6.3 34-25 62.8-53.3 82.1v68.2h86.2c50.5-46.6 81.4-115.2 81.4-199.3z" />
-                                <path fill="#34A853"
-                                    d="M272 544.3c72.9 0 134.1-24.1 178.8-65.5l-86.2-68.2c-24 16.1-55 25.6-92.6 25.6-71 0-131.2-48-152.7-112.4H31.1v70.6C75.2 487.6 167.6 544.3 272 544.3z" />
-                                <path fill="#FBBC05"
-                                    d="M119.3 328.9c-10.9-32.6-10.9-67.5 0-100.1V158.2H31.1c-38.7 76.9-38.7 167.8 0 244.7l88.2-74z" />
-                                <path fill="#EA4335"
-                                    d="M272 107.7c39.6 0 75.4 13.7 103.6 40.7l77.6-77.6C403.6 24.1 342.4 0 272 0 167.6 0 75.2 56.7 31.1 158.2l88.2 70.4C140.8 155.7 201 107.7 272 107.7z" />
-                            </svg>
-                        </span>
-                        <span id="google-sign-in-text" class="text-sm font-semibold text-gray-800">Sign in with
-                            Google</span>
-                    </button>
-                </section>
 
                 <!-- Profile Setup View -->
                 <section id="profile-setup-view" class="p-6 bg-white rounded-xl shadow-2xl space-y-6 hidden">
