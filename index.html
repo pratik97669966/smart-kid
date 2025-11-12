@@ -36,7 +36,10 @@
             margin: auto;
         }
 
-        .stage-card:hover {
+        .stage-card:hover,
+        .exam-card:hover,
+        .subject-card:hover,
+        .paper-card:hover {
             transform: scale(1.03) translateY(-3px);
             box-shadow: 0 8px 15px rgba(139, 92, 246, 0.4);
         }
@@ -45,7 +48,6 @@
         #quiz-result-view {
             min-height: 80vh;
             padding-top: 2rem;
-            /* Removed display: flex to prevent override issues (Tailwind handles this) */
             flex-direction: column;
             justify-content: center;
         }
@@ -158,8 +160,6 @@
         .animate-fade-in-up {
             animation: fade-in-up 1s ease-in-out forwards;
         }
-
-        /* Keep existing hidden utility (Tailwind 'hidden') is used to remove element from layout after fade */
     </style>
 </head>
 
@@ -192,17 +192,18 @@
                 class="flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl transform transition duration-500 scale-95 md:scale-100">
 
                 <!-- Illustration (hidden on very small devices) -->
-                <div
-                    class="hidden md:flex md:w-1/2  items-center justify-center relative">
-                    <img src="/kidsmartlogo.png"
+                <div class="hidden md:flex md:w-1/2  items-center justify-center relative">
+                    <img src="https://placehold.co/400x400/f0e9ff/8b5cf6?text=Smart+Kid\n(Logo)"
+                        onerror="this.onerror=null;this.src='https://placehold.co/400x400/f0e9ff/8b5cf6?text=Smart+Kid\n(Logo)';"
                         alt="Smart Learning Illustration" class="w-80 drop-shadow-2xl animate-fade-in-up" />
                 </div>
 
                 <!-- Form side -->
                 <div class="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center space-y-6">
                     <div>
-                        <h2 class="text-4xl font-extrabold text-violet-700 mb-2">Welcome to Smart Kid!</h2>
-                        <p class="text-gray-600">Learn, play, and grow with fun quizzes 🎓</p>
+                        <h2 id="login-welcome" class="text-4xl font-extrabold text-violet-700 mb-2">Welcome to Smart
+                            Kid!</h2>
+                        <p id="login-tagline" class="text-gray-600">Learn, play, and grow with fun quizzes 🎓</p>
                     </div>
 
                     <!-- Google sign-in button -->
@@ -210,7 +211,7 @@
                         class="w-full max-w-xs flex items-center justify-center gap-3 py-3 px-4 bg-white rounded-full shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 border border-gray-200">
                         <img class="w-6 h-6" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
                             alt="Google logo" />
-                        <span class="text-gray-700 font-semibold">Sign in with Google</span>
+                        <span id="google-sign-in-text" class="text-gray-700 font-semibold">Sign in with Google</span>
                     </button>
 
                     <p class="text-xs text-gray-400">By signing in, you agree to our Terms & Privacy.</p>
@@ -334,16 +335,32 @@
                         </div>
                     </div>
 
-                    <!-- Subject Grid -->
-                    <h3 id="subjects-heading"
+                    <!-- Exam Type Grid -->
+                    <h3 id="exam-type-heading"
                         class="text-2xl font-extrabold text-gray-800 text-center pt-4 border-b-2 border-gray-200 pb-2">
                     </h3>
-                    <div id="subject-grid-map" class="grid grid-cols-2 gap-4">
+                    <div id="exam-type-grid" class="grid grid-cols-2 gap-4">
+                        <!-- Exam type cards will be injected here -->
+                    </div>
+                </section>
+
+                <!-- Subject Selection View (NEW) -->
+                <section id="subject-selection-view" class="space-y-6 hidden">
+                    <h2 id="subject-selection-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
+                    <div id="subject-list" class="flex flex-col space-y-4">
                         <!-- Subject cards will be injected here -->
                     </div>
                 </section>
 
-                <!-- Stage Selection View -->
+                <!-- Paper Selection View (NEW) -->
+                <section id="paper-selection-view" class="space-y-6 hidden">
+                    <h2 id="paper-selection-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
+                    <div id="paper-list" class="flex flex-col space-y-4">
+                        <!-- Paper cards will be injected here -->
+                    </div>
+                </section>
+
+                <!-- Stage (Difficulty) Selection View -->
                 <section id="stage-selection-view" class="space-y-6 hidden">
                     <h2 id="stage-selection-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
                     <p id="stage-selection-subtitle" class="text-center text-gray-600"></p>
@@ -516,7 +533,7 @@
         </div>
     </div>
 
-    <!-- MAIN SCRIPT (keeps all your original logic; only changed how splash is hidden & improved sign-in UI markup above) -->
+    <!-- MAIN SCRIPT (Module) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -549,7 +566,8 @@
 
         // Use environment variables if available, otherwise use defaults
         window.initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smart-kid-app';
+        // Use the project ID as a fallback app ID
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.projectId || 'default-smart-kid-app';
 
         if (firebaseConfig) {
             window.app = initializeApp(firebaseConfig);
@@ -604,6 +622,7 @@
         }
     </script>
 
+    <!-- MAIN SCRIPT (Legacy) -->
     <script>
         // --- GLOBAL STATE AND CONFIGURATION ---
         const API_URL_TRIVIA = 'https://opentdb.com/api.php';
@@ -616,6 +635,10 @@
         let currentLanguage = 'mr';
         let isWeeklyTestAvailable = false;
         let isTestPaid = false;
+
+        // NEW: Store current exam context
+        let currentExamType = null;
+        let currentSubject = null;
 
         // Subject Definitions: Added a 'standards' array to control visibility
         const SUBJECTS_DATA = [
@@ -659,7 +682,19 @@
             'nav-history-text': { en: 'History', mr: 'इतिहास', hi: 'इतिहास' },
             'nav-profile-text': { en: 'Profile', mr: 'प्रोफाइल', hi: 'प्रोफ़ाइल' },
             'welcome-greeting': { en: 'Hello, Scholar!', mr: 'नमस्ते, विद्वाना!', hi: 'नमस्ते, विद्वान!' },
-            'subjects-heading': { en: 'Choose Your Subject:', mr: 'तुमचा विषय निवडा:', hi: 'अपना विषय चुनें:' },
+
+            // NEW/UPDATED Texts
+            'exam-type-heading': { en: 'Select Exam Type', mr: 'परीक्षेचा प्रकार निवडा', hi: 'परीक्षा का प्रकार चुनें' },
+            'exam-regular': { en: 'Regular Quiz', mr: 'नियमित क्विझ', hi: 'नियमित प्रश्नोत्तरी' },
+            'exam-scholarship': { en: 'Scholarship Exam', mr: 'शिष्यवृत्ती परीक्षा', hi: 'छात्रवृत्ति परीक्षा' },
+            'exam-navodaya': { en: 'Navodaya Exam', mr: 'नवोदय परीक्षा', hi: 'नवोदय परीक्षा' },
+            'premium-locked': { en: 'Premium 🔒', mr: 'प्रीमियम 🔒', hi: 'प्रीमियम 🔒' },
+            'subject-selection-title': { en: 'Select Subject', mr: 'विषय निवडा', hi: 'विषय चुनें' },
+            'paper-selection-title': { en: 'Select Question Paper', mr: 'प्रश्नपत्रिका निवडा', hi: 'प्रश्न पत्र चुनें' },
+            'no-subjects-found': { en: 'No subjects found for your standard in this category.', mr: 'या वर्गात तुमच्या इयत्तेसाठी कोणतेही विषय आढळले नाहीत.', hi: 'इस श्रेणी में आपकी कक्षा के लिए कोई विषय नहीं मिला।' },
+            'no-papers-found': { en: 'No papers found for this subject.', mr: 'या विषयासाठी कोणतेही पेपर आढळले नाहीत.', hi: 'इस विषय के लिए कोई पेपर नहीं मिला।' },
+            'subjects-heading': { en: 'Choose Your Subject:', mr: 'तुमचा विषय निवडा:', hi: 'अपना विषय चुनें:' }, // Kept for regular quiz
+
             'stage-selection-title': { en: 'Select Difficulty', mr: 'कठीण पातळी निवडा', hi: 'कठिनाई स्तर चुनें' },
             'stage-selection-subtitle': { en: 'Higher difficulty means higher score points!', mr: 'जास्त कठिण म्हणजे जास्त गुण!', hi: 'अधिक कठिनाई का अर्थ है अधिक अंक!' },
             'next-btn-text': { en: 'Next Question', mr: 'पुढचा प्रश्न', hi: 'अगला प्रश्न' },
@@ -677,20 +712,23 @@
             'test-card-status-inactive': { en: 'Next test: Sunday!', mr: 'पुढची चाचणी: रविवार!', hi: 'अगला टेस्ट: रविवार!' },
             'test-card-status-active': { en: 'Test is Live! Click to Start.', mr: 'चाचणी लाईव्ह आहे! सुरू करण्यासाठी क्लिक करा.', hi: 'टेस्ट लाइव है! शुरू करने के लिए क्लिक करें.' },
             'test-card-status-paid': { en: 'Premium Access: UNLOCKED! ✅', mr: 'प्रीमियम प्रवेश: अनलॉक झाला! ✅', hi: 'प्रीमियम एक्सेस: अनलॉक! ✅' },
-            'test-card-status-pay': { en: 'One-time fee: ₹9.00 - Unlock!', mr: 'एक-वेळ शुल्क: ₹९.०० - अनलॉक करा!', hi: 'एक बार का शुल्क: ₹९.०० - अनलॉक करें!' },
+            'test-card-status-pay': { en: 'Unlock all Premium Tests!', mr: 'सर्व प्रीमियम चाचण्या अनलॉक करा!', hi: 'सभी प्रीमियम टेस्ट अनलॉक करें!' },
             'test-card-btn-start': { en: 'START TEST', mr: 'चाचणी सुरू करा', hi: 'टेस्ट शुरू करें' },
-            'test-card-btn-pay': { en: 'PAY ₹9.00', mr: 'पेमेंट करा ₹९.००', hi: 'भुगतान करें ₹९.००' },
+            'test-card-btn-pay': { en: 'UNLOCK NOW', mr: 'आता अनलॉक करा', hi: 'अभी अनलॉक करें' },
             'leaderboard-title': { en: 'Global Top Scorers 🏆', mr: 'जागतिक टॉप स्कोअरर्स 🏆', hi: 'वैश्विक टॉप स्कोरर 🏆' },
             'history-title': { en: 'My Quiz History 📜', mr: 'माझा क्विझ इतिहास 📜', hi: 'मेरा क्विज़ इतिहास 📜' },
             'history-loading': { en: 'Loading history...', mr: 'इतिहास लोड होत आहे...', hi: 'इतिहास लोड हो रहा है...' },
             'leaderboard-loading': { en: 'Loading leaderboard...', mr: 'लीडरबोर्ड लोड होत आहे...', hi: 'लीडरबोर्ड लोड हो रहा है...' },
             'question-loading': { en: 'Fetching Questions...', mr: 'प्रश्न आणले जात आहेत...', hi: 'प्रश्न प्राप्त किए जा रहे हैं...' },
             'question-generating-error': { en: 'Could not fetch questions. Try again.', mr: 'प्रश्न मिळू शकले नाही. पुन्हा प्रयत्न करा.', hi: 'प्रश्न प्राप्त नहीं हो सके। पुनः प्रयास करें.' },
-            'modal-pay-title': { en: 'Unlock Premium Test Access', mr: 'प्रीमियम चाचणी प्रवेश अनलॉक करा', hi: 'प्रीमियम टेस्ट एक्सेस अनलॉक करें' },
-            'modal-pay-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock **ALL** weekly premium tests permanently. (Razorpay Simulation)', mr: 'सर्व साप्ताहिक प्रीमियम चाचण्या कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा. (Razorpay अनुकरण)', hi: 'सभी साप्ताहिक प्रीमियम टेस्ट को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें। (Razorpay सिमुलेशन)' },
+
+            // UPDATED Modal Texts
+            'modal-pay-title': { en: 'Unlock Premium Access', mr: 'प्रीमियम प्रवेश अनलॉक करा', hi: 'प्रीमियम एक्सेस अनलॉक करें' },
+            'modal-pay-message': { en: 'Confirm payment of ₹9.00 (One-time fee) to unlock <b>ALL</b> premium exams (Scholarship, Navodaya, Weekly Tests) permanently. (Razorpay Simulation)', mr: '<b>सर्व</b> प्रीमियम परीक्षा (शिष्यवृत्ती, नवोदय, साप्ताहिक चाचण्या) कायमस्वरूपी अनलॉक करण्यासाठी ₹९.०० (एक-वेळ शुल्क) पेमेंटची पुष्टी करा. (Razorpay अनुकरण)', hi: '<b>सभी</b> प्रीमियम परीक्षा (छात्रवृत्ति, नवोदय, साप्ताहिक टेस्ट) को स्थायी रूप से अनलॉक करने के लिए ₹९.०० (एक बार का शुल्क) भुगतान की पुष्टि करें। (Razorpay सिमुलेशन)' },
+
             'review-explanation-text': { en: 'Correct Answer Explanation', mr: 'योग्य उत्तराचे स्पष्टीकरण', hi: 'सही उत्तर का स्पष्टीकरण' },
-            'profile-test-paid': { en: 'Weekly Test Status: PAID (Unlocked Permanently) 🎉', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क (कायमस्वरूपी अनलॉक) 🎉', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान किया गया (स्थायी रूप से अनलॉक) 🎉' },
-            'profile-test-unpaid': { en: 'Weekly Test Status: UNPAID 🔒', mr: 'साप्ताहिक चाचणी स्थिती: सशुल्क नाही 🔒', hi: 'साप्ताहिक टेस्ट स्थिति: भुगतान नहीं किया गया 🔒' },
+            'profile-test-paid': { en: 'Premium Access: PAID (Unlocked PermanTAINLY) 🎉', mr: 'प्रीमियम प्रवेश: सशुल्क (कायमस्वरूपी अनलॉक) 🎉', hi: 'प्रीमियम एक्सेस: भुगतान किया गया (स्थायी रूप से अनलॉक) 🎉' },
+            'profile-test-unpaid': { en: 'Premium Access: UNPAID 🔒', mr: 'प्रीमियम प्रवेश: सशुल्क नाही 🔒', hi: 'प्रीमियम एक्सेस: भुगतान नहीं किया गया 🔒' },
             'translation-note': { en: '(Question translated from English, content might be imprecise.)', mr: '(प्रश्न इंग्रजीतून अनुवादित, सामग्री अचूक नसू शकते.)', hi: '(प्रश्न अंग्रेजी से अनूदित, सामग्री अपriष्कृत हो सकती है।)' }
         };
 
@@ -721,7 +759,8 @@
                 'login-welcome', 'login-tagline', 'google-sign-in-text', 'setup-title', 'setup-tagline',
                 'label-age', 'label-standard', 'label-medium', 'save-profile-text',
                 'nav-dashboard-text', 'nav-leaderboard-text', 'nav-history-text', 'nav-profile-text',
-                'subjects-heading', 'stage-selection-title', 'stage-selection-subtitle',
+                'exam-type-heading', 'stage-selection-title', 'stage-selection-subtitle',
+                'subject-selection-title', 'paper-selection-title',
                 'next-btn-text', 'review-btn-text', 'dashboard-btn-text',
                 'profile-page-title', 'sign-out-text', 'leaderboard-title', 'history-title',
                 'leaderboard-loading', 'history-loading', 'question-loading', 'translation-note'
@@ -735,7 +774,6 @@
                 document.getElementById('welcome-greeting').textContent = L('welcome-greeting');
                 updateProfileUI();
 
-                // --- FIX 2: Corrected 'result' to 'quiz-result' ---
                 if (currentView === 'quiz-result' && quizSession) renderResultView();
                 if (currentView === 'review' && quizSession) renderReviewView();
                 if (currentView === 'dashboard') renderDashboard();
@@ -970,7 +1008,11 @@
 
         // --- GAME LOGIC ---
 
+        // (OTDB)
         const startQuiz = async (subject, difficulty, isTest = false) => {
+            currentExamType = 'regular';
+            currentSubject = subject;
+
             const questionData = await fetchQuizQuestions(subject, difficulty, isTest ? 15 : 10);
             if (!questionData || questionData.length === 0) {
                 goBack();
@@ -987,13 +1029,43 @@
                 startTime: Date.now(),
                 duration: 0,
             };
-            if (currentView !== 'stage-selection') {
-                viewHistory.push('stage-selection');
-            }
+
             renderView('quiz');
             renderQuestion();
             startQuizTimer();
         };
+
+        // (FIREBASE)
+        const startFirebaseQuiz = (questions, examType, subjectName, paperTitle) => {
+            currentExamType = examType;
+            currentSubject = subjectName;
+
+            // Ensure questions are in a valid array format
+            const questionsArray = Array.isArray(questions) ? questions : Object.values(questions || {});
+
+            if (!questionsArray || questionsArray.length === 0) {
+                showModal("Error", "This paper seems to be empty.", false);
+                goBack();
+                return;
+            }
+
+            quizSession = {
+                subject: `${subjectName} - ${paperTitle}`,
+                difficulty: examType,
+                questions: questionsArray.map(q => ({ ...q, attempted: false, userAnswer: -1 })),
+                currentQIndex: 0,
+                score: 0,
+                correctCount: 0,
+                isTest: true, // All Firebase quizzes are considered 'tests'
+                startTime: Date.now(),
+                duration: 0,
+            };
+
+            renderView('quiz');
+            renderQuestion();
+            startQuizTimer();
+        };
+
 
         let quizTimerInterval = null;
         const startQuizTimer = () => {
@@ -1029,8 +1101,18 @@
 
             const questionKey = `question_${currentLanguage}`;
             const optionsKey = `options_${currentLanguage}`;
-            const options = q[optionsKey] || q.options_en;
+
+            // Fallback logic: Use 'en' if the current language's data is missing
             const questionText = q[questionKey] || q.question_en;
+            const options = q[optionsKey] || q.options_en;
+
+            // Final fallback for safety
+            if (!options || !Array.isArray(options)) {
+                console.error("Invalid options data for question:", q);
+                showModal("Quiz Error", "Failed to load question options. Skipping.", false);
+                nextQuestion(); // Skip this broken question
+                return;
+            }
 
             document.getElementById('quiz-question-text').textContent = questionText;
             document.getElementById('quiz-next-btn').classList.add('hidden');
@@ -1076,7 +1158,7 @@
 
             if (isCorrect) {
                 quizSession.correctCount++;
-                quizSession.score += q.scoreValue;
+                quizSession.score += (q.scoreValue || 10); // Default to 10 if scoreValue is missing
                 playSound('correct');
             } else {
                 playSound('wrong');
@@ -1097,18 +1179,16 @@
             }
         };
 
-        // --- FIX 1: Corrected 'result' to 'quiz-result' ---
         const endQuiz = async () => {
             playSound('level_up');
             await saveQuizHistory(quizSession);
-            renderView('quiz-result'); // Corrected view name
+            renderView('quiz-result');
             renderResultView();
         };
 
         const renderResultView = () => {
             if (!quizSession || !quizSession.questions) {
                 console.error("renderResultView called, but quizSession is empty.");
-                // Show a minimal error on the result page itself, don't redirect
                 const titleElement = document.getElementById('result-title');
                 if (titleElement) titleElement.textContent = "Error";
                 const taglineElement = document.getElementById('result-tagline');
@@ -1147,19 +1227,15 @@
                 .replace('{correct}', correctQ);
         };
 
-        // --- FIX 5: Corrected 'result' to 'quiz-result' ---
         const openReviewScreen = (session, sourceView) => {
-            if (currentView !== 'review') {
-                viewHistory.push(currentView);
-            }
             quizSession = session;
-            renderView('review');
+            renderView('review', true); // Pass true to indicate it's a sub-view
 
             if (sourceView === 'history') {
                 document.getElementById('close-review-btn').onclick = () => renderView('history');
                 document.getElementById('close-review-text').textContent = L('back-to-history-text');
             } else {
-                document.getElementById('close-review-btn').onclick = () => renderView('quiz-result'); // Corrected view name
+                document.getElementById('close-review-btn').onclick = () => renderView('quiz-result');
                 document.getElementById('close-review-text').textContent = L('close-review-text');
             }
         };
@@ -1173,36 +1249,43 @@
             reviewList.innerHTML = '';
             document.getElementById('review-title').textContent = `${L('review-btn-text')} - ${quizSession.subject}`;
 
-            quizSession.questions.forEach((q, index) => {
+            const questionsArray = Array.isArray(quizSession.questions) ? quizSession.questions : Object.values(quizSession.questions || {});
+
+            questionsArray.forEach((q, index) => {
                 const isCorrect = q.userAnswer === q.correct_answer_index;
                 const questionKey = `question_${currentLanguage}`;
                 const explanationKey = `explanation_${currentLanguage}`;
                 const optionsKey = `options_${currentLanguage}`;
 
                 const qText = q[questionKey] || q.question_en;
-                const explanationText = q[explanationKey] || q.explanation_en;
+                const explanationText = q[explanationKey] || q.explanation_en || "No explanation provided.";
                 const options = q[optionsKey] || q.options_en;
 
                 const card = document.createElement('div');
                 card.className = `p-4 rounded-xl shadow-lg border-l-4 ${isCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-red-500 bg-red-50'} space-y-3`;
                 let html = `<p class="font-bold text-lg">${index + 1}. ${qText}</p>`;
 
-                options.forEach((opt, optIndex) => {
-                    const isUser = optIndex === q.userAnswer;
-                    const isCorrectOption = optIndex === q.correct_answer_index;
-                    let colorClass = 'text-gray-700';
-                    if (isCorrectOption) {
-                        colorClass = 'font-bold text-emerald-600';
-                    } else if (isUser && !isCorrect) {
-                        colorClass = 'font-bold text-red-600 line-through';
-                    }
-                    html += `<p class="ml-4 text-sm ${colorClass}">${String.fromCharCode(65 + optIndex)}. ${opt} ${isCorrectOption ? ' (Correct Answer)' : ''} ${isUser && !isCorrect ? ' (Your Answer)' : ''}</p>`;
-                });
+                if (options && Array.isArray(options)) {
+                    options.forEach((opt, optIndex) => {
+                        const isUser = optIndex === q.userAnswer;
+                        const isCorrectOption = optIndex === q.correct_answer_index;
+                        let colorClass = 'text-gray-700';
+                        if (isCorrectOption) {
+                            colorClass = 'font-bold text-emerald-600';
+                        } else if (isUser && !isCorrect) {
+                            colorClass = 'font-bold text-red-600 line-through';
+                        }
+                        html += `<p class="ml-4 text-sm ${colorClass}">${String.fromCharCode(65 + optIndex)}. ${opt} ${isCorrectOption ? ' (Correct Answer)' : ''} ${isUser && !isCorrect ? ' (Your Answer)' : ''}</p>`;
+                    });
+                } else {
+                    html += `<p class="ml-4 text-sm text-red-500">Error: Options not found.</p>`;
+                }
+
 
                 html += `<div class="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                                   <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
-                                   <p class="text-sm text-gray-800">${explanationText}</p>
-                                 </div>`;
+                                 <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
+                                 <p class="text-sm text-gray-800">${explanationText}</p>
+                               </div>`;
                 card.innerHTML = html;
                 reviewList.appendChild(card);
             });
@@ -1218,22 +1301,24 @@
             document.getElementById('header-title').textContent = '';
         };
 
-        const renderView = (viewName) => {
+        // isSubView parameter prevents pushing to history (e.g., review from result)
+        const renderView = (viewName, isSubView = false) => {
             if (!currentUser && viewName !== 'login' && viewName !== 'profile-setup') {
                 viewName = 'login';
             }
-            if (viewName !== currentView && !['quiz-result', 'review', 'login', 'profile-setup'].includes(currentView)) {
+
+            // --- History Management ---
+            // Only push to history if it's a new view, not a sub-view, and not a main tab
+            if (viewName !== currentView && !isSubView && !['dashboard', 'leaderboard', 'history', 'profile', 'login', 'profile-setup'].includes(viewName)) {
                 if (viewHistory.length === 0 || viewHistory[viewHistory.length - 1] !== currentView) {
                     viewHistory.push(currentView);
                 }
-            } else if (viewName === currentView) {
-                if (['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName)) {
-                    viewHistory = [];
-                }
             }
-            if (viewName === 'dashboard' || viewName === 'login' || viewName === 'profile-setup') {
+            // Reset history if navigating to a main tab
+            if (['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName)) {
                 viewHistory = [];
             }
+            // --- End History Management ---
 
             hideAllViews();
             currentView = viewName;
@@ -1246,20 +1331,12 @@
 
             const showNav = ['dashboard', 'leaderboard', 'history', 'profile'].includes(viewName);
             const bottomNav = document.getElementById('bottom-nav');
-            if (showNav) {
-                bottomNav.classList.remove('hidden');
-            } else {
-                bottomNav.classList.add('hidden');
-            }
+            bottomNav.classList.toggle('hidden', !showNav);
 
             const backBtn = document.getElementById('header-back-btn');
-            // --- FIX 4: Corrected 'result' to 'quiz-result' ---
-            const showBackBtn = ['stage-selection', 'quiz', 'quiz-result', 'review'].includes(viewName);
-            if (showBackBtn) {
-                backBtn.classList.remove('hidden');
-            } else {
-                backBtn.classList.add('hidden');
-            }
+            const showBackBtn = viewHistory.length > 0 || ['quiz-result', 'review'].includes(viewName); // Show if history exists OR on result/review
+            backBtn.classList.toggle('hidden', !showBackBtn);
+
 
             // --- View-Specific Logic ---
             switch (viewName) {
@@ -1267,10 +1344,9 @@
                     document.getElementById('header-title').textContent = 'Smart Kid';
                     renderDashboard();
                     break;
-                // --- FIX 3: Corrected 'result' to 'quiz-result' ---
                 case 'quiz-result':
                     document.getElementById('header-title').textContent = 'Quiz Result';
-                    // renderResultView() is now called by endQuiz()
+                    // renderResultView() is called by endQuiz()
                     break;
                 case 'leaderboard':
                     document.getElementById('header-title').textContent = L('leaderboard-title');
@@ -1284,8 +1360,14 @@
                     document.getElementById('header-title').textContent = L('profile-page-title');
                     updateProfileUI();
                     break;
+                case 'subject-selection':
+                    document.getElementById('header-title').textContent = L('subject-selection-title');
+                    break;
+                case 'paper-selection':
+                    document.getElementById('header-title').textContent = L('paper-selection-title');
+                    break;
                 case 'stage-selection':
-                    document.getElementById('header-title').textContent = 'Select Difficulty';
+                    document.getElementById('header-title').textContent = L('stage-selection-title');
                     break;
                 case 'quiz':
                     document.getElementById('header-title').textContent = quizSession?.subject || 'Quiz';
@@ -1298,27 +1380,15 @@
             console.log("Current View:", currentView, "History:", viewHistory);
         };
 
-        // --- FIX 4: Corrected 'result' to 'quiz-result' ---
         const goBack = () => {
-            if (currentView === 'quiz-result' || currentView === 'quiz') {
+            // Special case: from quiz or result, always go to dashboard and clear session
+            if (currentView === 'quiz' || currentView === 'quiz-result' || currentView === 'review') {
                 quizSession = null;
+                viewHistory = []; // Clear history stack
                 renderView('dashboard');
                 return;
             }
-            if (currentView === 'review') {
-                let previousView = viewHistory.pop();
-                if (previousView === 'quiz-result' || previousView === 'history') {
-                    renderView(previousView);
-                } else {
-                    renderView('dashboard');
-                }
-                return;
-            }
-            if (currentView === 'stage-selection') {
-                viewHistory.pop();
-                renderView('dashboard');
-                return;
-            }
+
             let previousView = viewHistory.pop();
             if (previousView) {
                 renderView(previousView);
@@ -1338,28 +1408,180 @@
             return SUBJECTS_DATA.filter(subject => subject.standards.includes(std));
         };
 
-        // --- DASHBOARD RENDERING (GRID Layout) ---
+        // --- DASHBOARD RENDERING (NEW) ---
         const renderDashboard = () => {
             if (!userProfile) return;
             checkWeeklyTestStatus();
-            const gridContainer = document.getElementById('subject-grid-map');
-            gridContainer.innerHTML = '';
-            const subjectsToShow = getStandardSubjects(userProfile.standard);
+            renderExamTypeGrid();
+        };
 
-            subjectsToShow.forEach((subject) => {
+        const renderExamTypeGrid = () => {
+            const gridContainer = document.getElementById('exam-type-grid');
+            gridContainer.innerHTML = '';
+
+            const examTypes = [
+                { id: 'regular', name: L('exam-regular'), emoji: '📚', color: 'bg-blue-500', isPremium: false },
+                { id: 'scholarship', name: L('exam-scholarship'), emoji: '🎓', color: 'bg-green-500', isPremium: true },
+                { id: 'navodaya', name: L('exam-navodaya'), emoji: '🏫', color: 'bg-orange-500', isPremium: true },
+            ];
+
+            examTypes.forEach((exam) => {
                 const card = document.createElement('button');
-                card.className = `p-4 h-32 ${subject.color} text-white rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 font-bold transition duration-300 transform hover:scale-[1.03] stage-card`;
+                const isLocked = exam.isPremium && !isTestPaid;
+
+                card.className = `p-4 h-32 ${exam.color} ${isLocked ? 'opacity-70' : ''} text-white rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 font-bold transition duration-300 transform ${isLocked ? 'cursor-not-allowed' : 'hover:scale-[1.03] exam-card'}`;
                 card.innerHTML = `
-                   <span class="text-4xl">${subject.emoji}</span>
-                   <span class="text-sm font-semibold text-center">${subject.name}</span>
-                 `;
-                card.onclick = () => renderDifficultySelection(subject.name);
+                    <span class="text-4xl">${exam.emoji}</span>
+                    <span class="text-sm font-semibold text-center">${exam.name}</span>
+                    ${isLocked ? `<span class="text-xs font-bold text-yellow-300">${L('premium-locked')}</span>` : ''}
+                `;
+
+                if (isLocked) {
+                    card.onclick = () => showPaymentModal(() => renderSubjectSelection(exam.id)); // Pay then proceed
+                } else if (exam.id === 'regular') {
+                    card.onclick = () => renderSubjectSelection('regular');
+                } else {
+                    card.onclick = () => renderSubjectSelection(exam.id); // Scholarship or Navodaya (paid)
+                }
+
                 gridContainer.appendChild(card);
             });
         };
 
-        // --- Difficulty Selection ---
+        // --- NEW: Subject Selection ---
+        const renderSubjectSelection = async (examType) => {
+            currentExamType = examType;
+            renderView('subject-selection');
+            const list = document.getElementById('subject-list');
+            list.innerHTML = `<p class="text-center text-gray-500">${L('history-loading')}</p>`; // Re-use loading text
+            document.getElementById('subject-selection-title').textContent = L('subject-selection-title');
+
+            let subjects = [];
+
+            if (examType === 'regular') {
+                subjects = getStandardSubjects(userProfile.standard).map(s => ({
+                    id: s.name,
+                    name: s.name,
+                    emoji: s.emoji,
+                    color: s.color,
+                }));
+            } else {
+                // Fetch from Firebase
+                const fbSubjects = await fetchFirebaseSubjects(examType, userProfile.standard);
+                subjects = fbSubjects.map(s => ({
+                    id: s,
+                    name: s, // "Math", "Science"
+                    emoji: '📝', // Default emoji for FB subjects
+                    color: 'bg-violet-500'
+                }));
+            }
+
+            list.innerHTML = ''; // Clear loading
+            if (subjects.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-500">${L('no-subjects-found')}</p>`;
+                return;
+            }
+
+            subjects.forEach((subject) => {
+                const card = document.createElement('button');
+                card.className = `w-full p-5 ${subject.color} text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300 transform hover:scale-[1.03] subject-card`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="text-3xl">${subject.emoji}</div>
+                        <p class="text-xl font-bold">${subject.name}</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                `;
+
+                if (examType === 'regular') {
+                    card.onclick = () => renderDifficultySelection(subject.id);
+                } else {
+                    card.onclick = () => renderPaperSelection(examType, subject.id);
+                }
+                list.appendChild(card);
+            });
+        };
+
+        // --- NEW: Fetch Firebase Subjects ---
+        const fetchFirebaseSubjects = async (examType, standard) => {
+            try {
+                const subjectsRef = ref(window.db, `artifacts/${window.appId}/exam_data/${examType}/${standard}`);
+                const snapshot = await get(subjectsRef);
+                if (snapshot.exists()) {
+                    return Object.keys(snapshot.val()); // Returns ["Math", "Science", "English"]
+                }
+                return [];
+            } catch (error) {
+                console.error("Fetch Firebase Subjects Error:", error);
+                showModal("Error", "Could not load subjects from database.", false);
+                return [];
+            }
+        };
+
+        // --- NEW: Paper Selection ---
+        const renderPaperSelection = async (examType, subjectName) => {
+            currentSubject = subjectName;
+            renderView('paper-selection');
+            const list = document.getElementById('paper-list');
+            list.innerHTML = `<p class="text-center text-gray-500">${L('history-loading')}</p>`;
+            document.getElementById('paper-selection-title').textContent = `${L('paper-selection-title')} - ${subjectName}`;
+
+            const papers = await fetchFirebasePapers(examType, userProfile.standard, subjectName);
+            list.innerHTML = ''; // Clear loading
+
+            const paperKeys = Object.keys(papers);
+
+            if (paperKeys.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-500">${L('no-papers-found')}</p>`;
+                return;
+            }
+
+            paperKeys.forEach(paperKey => {
+                const paper = papers[paperKey];
+                const card = document.createElement('button');
+                card.className = `w-full p-5 bg-gray-700 text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300 transform hover:scale-[1.03] paper-card`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="text-3xl">📄</div>
+                        <p class="text-xl font-bold">${paper.title}</p>
+                    </div>
+                    <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Start</span>
+                `;
+                card.onclick = () => startFirebaseQuiz(paper.questions, examType, subjectName, paper.title);
+                list.appendChild(card);
+            });
+        };
+
+        // --- NEW: Fetch Firebase Papers ---
+        const fetchFirebasePapers = async (examType, standard, subjectName) => {
+            try {
+                const papersRef = ref(window.db, `artifacts/${window.appId}/exam_data/${examType}/${standard}/${subjectName}/papers`);
+                const snapshot = await get(papersRef);
+                if (!snapshot.exists()) {
+                    return {};
+                }
+
+                const papersData = snapshot.val();
+                // Convert questions objects to arrays if they aren't already
+                Object.keys(papersData).forEach(paperKey => {
+                    const paper = papersData[paperKey];
+                    if (paper.questions && typeof paper.questions === 'object' && !Array.isArray(paper.questions)) {
+                        paper.questions = Object.values(paper.questions);
+                    }
+                });
+                return papersData;
+
+            } catch (error) {
+                console.error("Fetch Firebase Papers Error:", error);
+                showModal("Error", "Could not load papers from database.", false);
+                return {};
+            }
+        };
+
+
+        // --- (Regular) Difficulty Selection ---
         const renderDifficultySelection = (subject) => {
+            currentSubject = subject; // Keep track of subject
             renderView('stage-selection');
             const list = document.getElementById('stage-list');
             list.innerHTML = '';
@@ -1369,23 +1591,23 @@
             Object.keys(DIFFICULTIES).forEach(difficultyKey => {
                 const diff = DIFFICULTIES[difficultyKey];
                 const card = document.createElement('button');
-                card.className = `w-full p-5 ${diff.color} text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300 transform hover:scale-[1.03]`;
+                card.className = `w-full p-5 ${diff.color} text-white rounded-xl shadow-xl flex items-center justify-between transition duration-300 transform hover:scale-[1.03] stage-card`;
                 card.innerHTML = `
-                   <div class="flex items-center space-x-4">
-                       <div class="text-3xl">${diff.emoji}</div>
-                       <div>
-                               <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
-                               <p class="font-semibold text-sm opacity-90">${subject}</p>
-                       </div>
-                   </div>
-                   <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Score: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-3xl">${diff.emoji}</div>
+                        <div>
+                                 <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
+                                 <p class="font-semibold text-sm opacity-90">${subject}</p>
+                        </div>
+                    </div>
+                    <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Score: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
                  `;
-                card.onclick = () => startQuiz(subject, difficultyKey, false);
+                card.onclick = () => startQuiz(subject, difficultyKey, false); // This is the OTDB quiz
                 list.appendChild(card);
             });
         };
 
-        // --- WEEKLY TEST LOGIC ---
+        // --- WEEKLY TEST LOGIC (Updated Payment) ---
         const checkWeeklyTestStatus = () => {
             const testCard = document.getElementById('weekly-test-card');
             if (!testCard) return;
@@ -1408,12 +1630,15 @@
                     document.getElementById('test-card-status').textContent = L('test-card-status-paid');
                     document.getElementById('test-card-status').className = 'text-sm text-yellow-700';
                     cardBtn.textContent = L('test-card-btn-start');
-                    testCard.onclick = () => startQuiz('Weekly Test (Premium)', 'hard', true);
+                    testCard.onclick = () => startQuiz('Weekly Test (Premium)', 'hard', true); // Uses OTDB
                 } else {
                     document.getElementById('test-card-status').textContent = L('test-card-status-pay');
                     document.getElementById('test-card-status').className = 'text-sm text-red-700 font-semibold';
                     cardBtn.textContent = L('test-card-btn-pay');
-                    testCard.onclick = () => showPaymentModal();
+                    testCard.onclick = () => showPaymentModal(() => {
+                        // On successful payment, auto-start the weekly test
+                        startQuiz('Weekly Test (Premium)', 'hard', true);
+                    });
                 }
             } else {
                 testCard.classList.remove('hidden');
@@ -1425,12 +1650,12 @@
             }
         };
 
-        const showPaymentModal = () => {
+        const showPaymentModal = (onConfirmCallback = () => { }) => {
             showModal(
                 L('modal-pay-title'),
                 L('modal-pay-message'),
                 true,
-                () => {
+                () => { // onConfirm
                     const modal = document.getElementById('global-modal');
                     modal.classList.add('hidden');
                     showModal('Processing Payment...', 'Simulating transaction for ₹9.00 via Razorpay... Please wait.', false);
@@ -1440,10 +1665,15 @@
                         isTestPaid = true;
                         userProfile.isTestPaid = true;
                         document.getElementById('global-modal').classList.add('hidden');
-                        showModal('Success! 🎉', 'Payment successful. All weekly tests are now unlocked permanently!', false);
+                        showModal('Success! 🎉', 'Payment successful. All premium content is now unlocked permanently!', false);
+
+                        // Update UI
                         checkWeeklyTestStatus();
+                        renderDashboard(); // Re-render dashboard to unlock cards
                         updateProfileUI();
-                        renderView('dashboard');
+
+                        // Execute the callback (e.g., proceed to subject selection)
+                        onConfirmCallback();
                     }, 2000);
                 }
             );
@@ -1477,15 +1707,15 @@
                 const card = document.createElement('div');
                 card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01] border-b-2 ${user.isTestPaid ? 'border-yellow-400' : 'border-violet-200'}`;
                 card.innerHTML = `
-                   <div class="flex items-center space-x-3">
-                       <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
-                       <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
-                       <div>
-                           <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${user.isTestPaid ? '⭐' : ''}</p>
-                           <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
-                       </div>
-                   </div>
-                   <span class="text-2xl font-bold text-violet-600">${user.score || 0}</span>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
+                        <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
+                        <div>
+                            <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${user.isTestPaid ? '⭐' : ''}</p>
+                            <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
+                        </div>
+                    </div>
+                    <span class="text-2xl font-bold text-violet-600">${user.score || 0}</span>
                  `;
                 list.appendChild(card);
             });
@@ -1509,20 +1739,26 @@
             list.innerHTML = '';
             historyList.forEach(session => {
                 const date = new Date(session.startTime).toLocaleDateString(currentLanguage === 'mr' ? 'mr-IN' : currentLanguage === 'hi' ? 'hi-IN' : 'en-US');
-                const colorClass = session.correctCount > (session.questions.length / 2) ? 'bg-emerald-50' : 'bg-red-50';
-                const statusEmoji = session.correctCount > (session.questions.length / 2) ? '🥳' : '✍️';
+
+                // Ensure questions is an array for length check
+                const questionsArray = Array.isArray(session.questions) ? session.questions : Object.values(session.questions || {});
+                const totalQuestions = questionsArray.length;
+                if (totalQuestions === 0) return; // Don't render broken history items
+
+                const colorClass = session.correctCount > (totalQuestions / 2) ? 'bg-emerald-50' : 'bg-red-50';
+                const statusEmoji = session.correctCount > (totalQuestions / 2) ? '🥳' : '✍️';
                 const card = document.createElement('div');
                 card.className = `p-4 ${colorClass} rounded-xl shadow-lg space-y-2 border-l-4 border-violet-500 cursor-pointer transition duration-200 hover:shadow-xl`;
                 card.onclick = () => openReviewScreen(session, 'history');
                 card.innerHTML = `
-                   <div class="flex justify-between items-center">
-                       <p class="text-lg font-bold text-gray-800">${session.subject} (${session.difficulty.toUpperCase()})</p>
-                       <span class="text-sm text-gray-500">${date}</span>
-                   </div>
-                   <div class="flex justify-between text-sm">
-                       <span class="font-semibold text-violet-600">Score: ${session.score} ${statusEmoji}</span>
-                       <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${session.questions.length}</span>
-                   </div>
+                    <div class="flex justify-between items-center">
+                        <p class="text-lg font-bold text-gray-800">${session.subject} (${session.difficulty.toUpperCase()})</p>
+                        <span class="text-sm text-gray-500">${date}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="font-semibold text-violet-600">Score: ${session.score} ${statusEmoji}</span>
+                        <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${totalQuestions}</span>
+                    </div>
                  `;
                 list.appendChild(card);
             });
@@ -1573,21 +1809,12 @@
             document.getElementById('lang-select').value = currentLanguage;
             localizeElements();
 
-            // Hook the improved Google sign-in button to your signInWithGoogle function
+            // Hook the improved Google sign-in button
             const googleBtn = document.getElementById('google-sign-in-btn');
             if (googleBtn) {
                 googleBtn.addEventListener('click', async () => {
-                    // Keep existing sign-in flow: this triggers Tone start + Firebase popup
-                    try {
-                        await Tone.start();
-                    } catch (e) {
-                        // ignore if Tone already started or blocked
-                    }
-                    // Use existing function if available
                     if (typeof signInWithGoogle === 'function') {
                         signInWithGoogle();
-                    } else {
-                        alert('Sign-in function not available.');
                     }
                 });
             }
@@ -1602,7 +1829,7 @@
             });
             document.getElementById('review-answers-btn').addEventListener('click', () => {
                 if (quizSession) {
-                    openReviewScreen(quizSession, 'quiz-result'); // Corrected source view
+                    openReviewScreen(quizSession, 'quiz-result');
                 } else {
                     renderView('dashboard');
                 }
