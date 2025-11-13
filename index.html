@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Kid - तुमचा स्मार्ट अभ्यास</title>
+    <title>Gamat Shala - गंमत शाळा</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 
@@ -245,7 +245,7 @@
             <div class="relative flex flex-col items-center">
                 <!-- Glow behind logo -->
                 <div class="absolute w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-                <h1 class="text-5xl sm:text-6xl font-extrabold drop-shadow-lg tracking-wide animate-bounce">Smart Kid
+                <h1 class="text-5xl sm:text-6xl font-extrabold drop-shadow-lg tracking-wide animate-bounce">Gamat Shala
                 </h1>
                 <p class="mt-4 text-lg opacity-90 animate-fade-in">Loading your learning world...</p>
 
@@ -265,7 +265,7 @@
 
                 <!-- Illustration (hidden on very small devices) -->
                 <div class="hidden md:flex md:w-1/2  items-center justify-center relative">
-                    <img src="https://placehold.co/400x400/f0e9ff/8b5cf6?text=Smart+Kid\n(Logo)"
+                    <img src="gammatshala.jpg"
                         onerror="this.onerror=null;this.src='https://placehold.co/400x400/f0e9ff/8b5cf6?text=Smart+Kid\n(Logo)';"
                         alt="Smart Learning Illustration" class="w-80 drop-shadow-2xl animate-fade-in-up" />
                 </div>
@@ -851,7 +851,7 @@
 
         // Localization Texts (Expanded)
         const TEXTS = {
-            'login-welcome': { en: 'Welcome to Smart Kid!', mr: 'स्मार्ट किडमध्ये आपले स्वागत आहे!', hi: 'स्मार्ट किड में आपका स्वागत है!' },
+            'login-welcome': { en: 'Welcome to Gamat Shala!', mr: 'गंमत शाळेमध्ये आपले स्वागत आहे.!', hi: 'गंमत शाला में आपका स्वागत है!' },
             'login-tagline': { en: 'Learn like you play a game!', mr: 'खेळासारखे शिका!', hi: 'खेल की तरह सीखें!' },
             'google-sign-in-text': { en: 'Sign in with Google', mr: 'गुगलने साइन इन करा', hi: 'Google से साइन इन करें' },
             'setup-title': { en: 'Profile Setup', mr: 'प्रोफाइल सेटअप', hi: 'प्रोफ़ाइल सेट करें' },
@@ -1196,7 +1196,7 @@
             if (!age || !standard || !medium || !schoolName) return;
 
             const newProfile = {
-                name: currentUser.displayName || 'Smart Kid User',
+                name: currentUser.displayName || 'Gamat Shala User',
                 email: currentUser.email || 'N/A',
                 photoURL: currentUser.photoURL || 'https://placehold.co/64x64/8b5cf6/ffffff?text=P',
                 age: parseInt(age),
@@ -1682,7 +1682,7 @@
             // --- View-Specific Logic ---
             switch (viewName) {
                 case 'dashboard':
-                    document.getElementById('header-title').textContent = 'Smart Kid';
+                    document.getElementById('header-title').textContent = 'Gamat Shala';
                     renderDashboard();
                     break;
                 case 'quiz-result':
