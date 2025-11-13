@@ -1,0 +1,326 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    --primary: #8b5cf6;
+    /* Violet-500 */
+    --success: #10b981;
+    /* Emerald-500 */
+    --danger: #ef4444;
+    /* Red-500 */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+}
+
+/* Mobile Frame for focused view on large screens, responsive on small screens */
+.mobile-frame {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: #ffffff;
+    margin: auto;
+}
+
+.stage-card:hover,
+.exam-card:hover,
+.subject-card:hover,
+.paper-card:hover {
+    transform: scale(1.03) translateY(-3px);
+    box-shadow: 0 8px 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Ensure result view is centered and visible */
+#quiz-result-view {
+    min-height: 80vh;
+    padding-top: 2rem;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.correct-animation {
+    animation: correctPulse 0.5s ease-in-out;
+}
+
+.wrong-animation {
+    animation: wrongShake 0.5s ease-in-out;
+}
+
+@keyframes correctPulse {
+    0% {
+        transform: scale(1);
+        background-color: white;
+    }
+
+    50% {
+        transform: scale(1.05);
+        background-color: var(--success);
+    }
+
+    100% {
+        transform: scale(1);
+        background-color: white;
+    }
+}
+
+@keyframes wrongShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+        background-color: white;
+    }
+
+    20%,
+    60% {
+        transform: translateX(-5px);
+        background-color: var(--danger);
+    }
+
+    40%,
+    80% {
+        transform: translateX(5px);
+        background-color: var(--danger);
+    }
+}
+
+/* Loading Spinner */
+.loader {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--primary);
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Splash fade customization (IMPROVED) --- */
+#splash {
+    transition: opacity 500ms ease, transform 400ms ease;
+    will-change: opacity, transform;
+}
+
+/* Applied when we want to smoothly fade away the splash */
+.splash-hidden {
+    opacity: 0;
+    transform: scale(0.995);
+    pointer-events: none;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 1s ease-in-out forwards;
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 1s ease-in-out forwards;
+}
+
+/* --- Practice View Styles --- */
+.practice-display {
+    font-size: 10rem;
+    /* 160px */
+    font-weight: 800;
+    /* extrabold */
+    color: #4f46e5;
+    /* indigo-600 */
+    line-height: 1;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9fafb;
+    /* gray-50 */
+    border-radius: 1.5rem;
+    /* 2xl */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    /* lg */
+    border: 2px solid #e5e7eb;
+    /* gray-200 */
+    padding: 1rem;
+    word-break: break-all;
+}
+
+/* Responsive font size for smaller screens */
+@media (max-width: 400px) {
+    .practice-display {
+        font-size: 7rem;
+        min-height: 150px;
+    }
+
+    /* Smaller font for math problems on small screens */
+    #practice-math-view .practice-display {
+        font-size: 4rem;
+        min-height: 120px;
+    }
+}
+
+.speak-btn {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    /* full */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* md */
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* space-x-2 */
+}
+
+.speak-btn:hover {
+    background-color: #7c3aed;
+    /* violet-600 */
+    transform: scale(1.05);
+}
+
+.nav-arrow-btn {
+    background-color: #e5e7eb;
+    /* gray-200 */
+    color: #374151;
+    /* gray-700 */
+    font-weight: 700;
+    padding: 1rem;
+    border-radius: 9999px;
+    /* full */
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-arrow-btn:hover {
+    background-color: #d1d5db;
+    /* gray-300 */
+    transform: scale(1.1);
+}
+
+/* --- NEW: Math Practice Styles --- */
+#practice-math-view .practice-display {
+    font-size: 5rem;
+    /* Smaller font to fit problem */
+    min-height: 160px;
+}
+
+.math-option-btn {
+    background-color: #ffffff;
+    color: #374151;
+    /* gray-700 */
+    font-weight: 700;
+    font-size: 1.5rem;
+    /* 24px */
+    padding: 1rem 1.5rem;
+    border-radius: 1.5rem;
+    /* 2xl */
+    border: 2px solid #e5e7eb;
+    /* gray-200 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* md */
+    transition: all 0.2s ease-in-out;
+}
+
+.math-option-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.03);
+}
+
+.math-option-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.math-option-btn.correct {
+    background-color: var(--success);
+    border-color: #065f46;
+    /* green-800 */
+    color: white;
+    transform: scale(1.05);
+    animation: correctPulse 0.5s ease-in-out;
+}
+
+.math-option-btn.wrong {
+    background-color: var(--danger);
+    border-color: #991b1b;
+    /* red-800 */
+    color: white;
+    opacity: 0.8;
+    text-decoration: line-through;
+    animation: wrongShake 0.5s ease-in-out;
+}
+
+
+/* --- NEW: Audio Toggle Switch Styles --- */
+.audio-toggle-btn {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.audio-toggle-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.audio-toggle-btn[aria-checked="true"] {
+    background-color: var(--success);
+    /* green-500 */
+}
+
+.audio-toggle-btn[aria-checked="false"] {
+    background-color: #9ca3af;
+    /* gray-400 */
+}
+
+.audio-toggle-btn[aria-checked="true"] .audio-toggle-knob {
+    transform: translateX(22px);
+}
+
+.audio-toggle-btn[aria-checked="false"] .audio-toggle-knob {
+    transform: translateX(0);
+}
