@@ -160,6 +160,78 @@
         .animate-fade-in-up {
             animation: fade-in-up 1s ease-in-out forwards;
         }
+
+        /* --- NEW: Practice View Styles --- */
+        .practice-display {
+            font-size: 10rem;
+            /* 160px */
+            font-weight: 800;
+            /* extrabold */
+            color: #4f46e5;
+            /* indigo-600 */
+            line-height: 1;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9fafb;
+            /* gray-50 */
+            border-radius: 1.5rem;
+            /* 2xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            /* lg */
+            border: 2px solid #e5e7eb;
+            /* gray-200 */
+        }
+
+        /* Responsive font size for smaller screens */
+        @media (max-width: 400px) {
+            .practice-display {
+                font-size: 7rem;
+                min-height: 150px;
+            }
+        }
+
+        .speak-btn {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            /* full */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* md */
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            /* space-x-2 */
+        }
+
+        .speak-btn:hover {
+            background-color: #7c3aed;
+            /* violet-600 */
+            transform: scale(1.05);
+        }
+
+        .nav-arrow-btn {
+            background-color: #e5e7eb;
+            /* gray-200 */
+            color: #374151;
+            /* gray-700 */
+            font-weight: 700;
+            padding: 1rem;
+            border-radius: 9999px;
+            /* full */
+            transition: all 0.2s ease-in-out;
+        }
+
+        .nav-arrow-btn:hover {
+            background-color: #d1d5db;
+            /* gray-300 */
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -486,6 +558,75 @@
                     </div>
                 </section>
 
+                <!-- NEW: Practice Number View -->
+                <section id="practice-number-view" class="space-y-6 hidden">
+                    <h2 id="practice-number-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
+                    <!-- Big Display -->
+                    <div id="practice-number-text" class="practice-display">1</div>
+                    <!-- Speak Button -->
+                    <button id="practice-number-speak-btn" class="speak-btn w-full max-w-sm mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .89-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <span id="practice-number-speak-text">Listen</span>
+                    </button>
+                    <!-- Navigation -->
+                    <div class="flex justify-between items-center max-w-sm mx-auto pt-4">
+                        <button id="practice-number-prev-btn" class="nav-arrow-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span id="practice-number-nav-text" class="text-gray-600 font-semibold">Practice 1-100</span>
+                        <button id="practice-number-next-btn" class="nav-arrow-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- NEW: Practice Alphabet View -->
+                <section id="practice-alphabet-view" class="space-y-6 hidden">
+                    <h2 id="practice-alphabet-title" class="text-3xl font-extrabold text-violet-700 text-center"></h2>
+                    <!-- Big Display -->
+                    <div id="practice-alphabet-text" class="practice-display">A</div>
+                    <!-- Speak Button -->
+                    <button id="practice-alphabet-speak-btn" class="speak-btn w-full max-w-sm mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .89-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <span id="practice-alphabet-speak-text">Listen</span>
+                    </button>
+                    <!-- Navigation -->
+                    <div class="flex justify-between items-center max-w-sm mx-auto pt-4">
+                        <button id="practice-alphabet-prev-btn" class="nav-arrow-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span id="practice-alphabet-nav-text" class="text-gray-600 font-semibold">Practice ABC</span>
+                        <button id="practice-alphabet-next-btn" class="nav-arrow-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </section>
+
+
                 <!-- Global Modal -->
                 <div id="global-modal"
                     class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
@@ -604,6 +745,8 @@
                         // Try to sign in with custom token if provided
                         if (window.initialAuthToken) {
                             await signInWithCustomToken(window.auth, window.initialAuthToken);
+                            // NOTE: Audio unlock must happen on a user gesture,
+                            // which is now handled by a global click listener in initApp()
                         }
                     } catch (error) {
                         console.error("Firebase Auth Custom Token Error (Proceeding to Login Screen):", error);
@@ -649,6 +792,7 @@
         let userProfile = null;
         let quizSession = null; // Holds current or last completed quiz session data
         let currentLanguage = 'mr';
+        let isAudioUnlocked = false; // --- NEW: Flag to track audio context status ---
 
         // UPDATED: Replaced single boolean with an object
         let premiumStatus = {
@@ -675,6 +819,24 @@
             { name: 'Computers', emoji: '💻', color: 'bg-cyan-500', categoryId: 18, standards: [8, 9, 10] },
             { name: 'Sports', emoji: '⚽', color: 'bg-pink-500', categoryId: 21, standards: [5, 6, 7, 8, 9, 10] },
         ];
+
+        // NEW: Data for Practice Modes
+        const PRACTICE_DATA = {
+            numbers: Array.from({ length: 100 }, (_, i) => String(i + 1)), // Ensure strings for TTS
+            en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+            mr: ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ए', 'ऐ', 'ओ', 'औ', 'अं', 'अः', 'ऋ', 'ऌ', 'क', 'ख', 'ग', 'घ', 'ङ', 'च', 'छ', 'ज', 'झ', 'ञ', 'ट', 'ठ', 'ड', 'ढ', 'ण', 'त', 'थ', 'द', 'ध', 'न', 'प', 'फ', 'ब', 'भ', 'म', 'य', 'र', 'ल', 'व', 'श', 'ष', 'स', 'ह', 'ळ', 'क्ष', 'ज्ञ'],
+            hi: ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ए', 'ऐ', 'ओ', 'औ', 'अं', 'अः', 'ऋ', 'क', 'ख', 'ग', 'घ', 'ङ', 'च', 'छ', 'ज', 'झ', 'ञ', 'ट', 'ठ', 'ड', 'ढ', 'ण', 'त', 'थ', 'द', 'ध', 'न', 'प', 'फ', 'ब', 'भ', 'म', 'य', 'र', 'ल', 'व', 'श', 'ष', 'स', 'ह', 'क्ष', 'त्र', 'ज्ञ']
+        };
+        let currentPracticeIndex = 0;
+        let currentPracticeType = null; // 'numbers', 'alphabet'
+
+        // NEW: Language map for Text-to-Speech
+        const TTS_LANG_MAP = {
+            en: 'en-US',
+            mr: 'mr-IN',
+            hi: 'hi-IN'
+        };
+
 
         const TRIVIA_CATEGORIES = SUBJECTS_DATA.reduce((acc, s) => {
             acc[s.name] = s.categoryId;
@@ -710,6 +872,9 @@
             'exam-regular': { en: 'Regular Quiz', mr: 'नियमित क्विझ', hi: 'नियमित प्रश्नोत्तरी' },
             'exam-scholarship': { en: 'Scholarship Exam', mr: 'शिष्यवृत्ती परीक्षा', hi: 'छात्रवृत्ति परीक्षा' },
             'exam-navodaya': { en: 'Navodaya Exam', mr: 'नवोदय परीक्षा', hi: 'नवोदय परीक्षा' },
+            'exam-practice-numbers': { en: 'Practice 123', mr: 'सराव १२३', hi: 'अभ्यास १२३' },
+            'exam-practice-alphabet': { en: 'Practice ABC', mr: 'सराव अक', hi: 'अभ्यास कखग' },
+
             'premium-locked': { en: 'Premium 🔒', mr: 'प्रीमियम 🔒', hi: 'प्रीमियम 🔒' },
             'subject-selection-title': { en: 'Select Subject', mr: 'विषय निवडा', hi: 'विषय चुनें' },
             'paper-selection-title': { en: 'Select Question Paper', mr: 'प्रश्नपत्रिका निवडा', hi: 'प्रश्न पत्र चुनें' },
@@ -767,10 +932,40 @@
             'profile-navodaya-paid': { en: 'Navodaya Exams: UNLOCKED 🎉', mr: 'नवोदय परीक्षा: अनलॉक 🎉', hi: 'नवोदय परीक्षा: अनलॉक 🎉' },
             'profile-navodaya-unpaid': { en: 'Navodaya Exams: LOCKED 🔒', mr: 'नवोदय परीक्षा: लॉक 🔒', hi: 'नवोदय परीक्षा: लॉक 🔒' },
 
-            'translation-note': { en: '(Question translated from English, content might be imprecise.)', mr: '(प्रश्न इंग्रजीतून अनुवादित, सामग्री अचूक नसू शकते.)', hi: '(प्रश्न अंग्रेजी से अनूदित, सामग्री अपriष्कृत हो सकती है।)' }
+            'translation-note': { en: '(Question translated from English, content might be imprecise.)', mr: '(प्रश्न इंग्रजीतून अनुवादित, सामग्री अचूक नसू शकते.)', hi: '(प्रश्न अंग्रेजी से अनूदित, सामग्री अपriष्कृत हो सकती है।)' },
+
+            // NEW: Practice View Texts
+            'practice-number-title': { en: 'Practice Numbers', mr: 'सराव १२३', hi: 'अभ्यास १२३' },
+            'practice-alphabet-title': { en: 'Practice Alphabet', mr: 'सराव अक', hi: 'अभ्यास कखग' },
+            'practice-number-speak-text': { en: 'Listen', mr: 'ऐका', hi: 'सुनो' },
+            'practice-alphabet-speak-text': { en: 'Listen', mr: 'ऐका', hi: 'सुनो' },
+            'practice-number-nav-text': { en: 'Practice 1-100', mr: 'सराव १-१००', hi: 'अभ्यास १-१००' },
+            'practice-alphabet-nav-text': { en: 'Practice Alphabet', mr: 'सराव वर्णमाला', hi: 'अभ्यास वर्णमाला' },
+
         };
 
-        // --- UTILITY FUNCTIONS ---
+        // --- AUDIO & UTILITY FUNCTIONS ---
+
+        // NEW: Global audio unlock function
+        const unlockAudio = async () => {
+            if (isAudioUnlocked) return;
+            try {
+                await Tone.start();
+                if (ttsSynth && !ttsSynth.speaking) {
+                    // Speak a silent utterance to unlock the synth
+                    const unlockSpeech = new SpeechSynthesisUtterance(' ');
+                    unlockSpeech.volume = 0;
+                    ttsSynth.speak(unlockSpeech);
+                }
+                isAudioUnlocked = true;
+                console.log("Audio contexts unlocked.");
+                // Remove the listener after it has succeeded
+                document.body.removeEventListener('click', unlockAudio);
+                document.body.removeEventListener('touchstart', unlockAudio);
+            } catch (e) {
+                console.warn("Audio context unlock failed (will try again on next interaction):", e);
+            }
+        };
 
         // Simple text simulation for localization (Open Trivia is English-only)
         const simulateTranslation = (text) => {
@@ -801,7 +996,10 @@
                 'subject-selection-title', 'paper-selection-title',
                 'next-btn-text', 'review-btn-text', 'dashboard-btn-text',
                 'profile-page-title', 'sign-out-text', 'leaderboard-title', 'history-title',
-                'leaderboard-loading', 'history-loading', 'question-loading', 'translation-note'
+                'leaderboard-loading', 'history-loading', 'question-loading', 'translation-note',
+                'practice-number-title', 'practice-alphabet-title',
+                'practice-number-speak-text', 'practice-alphabet-speak-text',
+                'practice-number-nav-text', 'practice-alphabet-nav-text'
             ];
             elements.forEach(id => {
                 const el = document.getElementById(id);
@@ -815,6 +1013,10 @@
                 if (currentView === 'quiz-result' && quizSession) renderResultView();
                 if (currentView === 'review' && quizSession) renderReviewView();
                 if (currentView === 'dashboard') renderDashboard();
+                if (currentView === 'practice-alphabet') {
+                    // Update nav text based on language
+                    document.getElementById('practice-alphabet-nav-text').textContent = L('practice-alphabet-nav-text');
+                }
             }
         };
         // Tone.js Sound System
@@ -824,6 +1026,7 @@
         }).toDestination();
 
         const playSound = (type) => {
+            if (!isAudioUnlocked) return; // Don't play if not unlocked
             try {
                 switch (type) {
                     case 'correct':
@@ -837,8 +1040,46 @@
                         break;
                 }
             } catch (e) {
-                console.warn("Audio context not started or Tone.js error:", e);
+                console.warn("Tone.js error:", e);
             }
+        };
+
+        // NEW: Text-to-Speech (TTS) Function
+        const ttsSynth = window.speechSynthesis;
+        const speak = (text, lang) => {
+            if (!isAudioUnlocked) return; // Don't speak if not unlocked
+            if (ttsSynth.speaking) {
+                ttsSynth.cancel();
+            }
+            if (text !== '') {
+                try {
+                    const utterThis = new SpeechSynthesisUtterance(text);
+                    utterThis.lang = lang || TTS_LANG_MAP[currentLanguage] || 'en-US';
+                    utterThis.rate = 0.8;
+                    utterThis.pitch = 1;
+                    ttsSynth.speak(utterThis);
+                } catch (e) {
+                    console.error("Speech Synthesis Error:", e);
+                    showModal("Audio Error", "Could not play audio. Please ensure your browser supports speech synthesis.", false);
+                }
+            }
+        };
+
+        // NEW: Helper function for practice mode audio
+        const speakCurrentPracticeItem = () => {
+            if (currentView !== 'practice-number' && currentView !== 'practice-alphabet') {
+                return;
+            }
+
+            let item;
+            if (currentPracticeType === 'numbers') {
+                item = PRACTICE_DATA.numbers[currentPracticeIndex];
+            } else {
+                const data = PRACTICE_DATA[currentLanguage] || PRACTICE_DATA.en;
+                item = data[currentPracticeIndex];
+            }
+
+            speak(item, TTS_LANG_MAP[currentLanguage]);
         };
 
         // Fetch with exponential backoff for rate limiting
@@ -865,7 +1106,8 @@
 
         const signInWithGoogle = async () => {
             try {
-                await Tone.start(); // Start audio context on user interaction
+                // Audio unlock is now handled by the global 'unlockAudio' function
+                // on the first click, so we don't need it here.
                 await window.signInWithPopup(window.auth, window.googleProvider);
             } catch (error) {
                 console.error("Google Sign-In Error:", error);
@@ -1066,10 +1308,9 @@
                     shuffleArray(allOptions);
                     const correctIndex = allOptions.findIndex(opt => opt === correct);
 
-                    let scoreValue = 0;
-                    if (q.difficulty === 'hard') scoreValue = 30;
-                    else if (q.difficulty === 'medium') scoreValue = 20;
-                    else scoreValue = 10;
+                    // --- SCORING CHANGE: All questions are worth 1 point ---
+                    let scoreValue = 1;
+                    // --- END SCORING CHANGE ---
 
                     const q_en = decodeHtml(q.question);
                     const expl_en = `The correct answer is "${correct}" (Topic: ${q.category}).`;
@@ -1088,7 +1329,7 @@
                         explanation_hi: simulateTranslation(expl_en),
                         attempted: false,
                         userAnswer: -1,
-                        scoreValue: scoreValue
+                        scoreValue: scoreValue // Set score to 1
                     };
                 });
                 return questions;
@@ -1147,7 +1388,9 @@
             quizSession = {
                 subject: `${subjectName} - ${paperTitle}`,
                 difficulty: examType,
-                questions: questionsArray.map(q => ({ ...q, attempted: false, userAnswer: -1 })),
+                // --- SCORING CHANGE: Override scoreValue to 1 for all Firebase questions ---
+                questions: questionsArray.map(q => ({ ...q, scoreValue: 1, attempted: false, userAnswer: -1 })),
+                // --- END SCORING CHANGE ---
                 currentQIndex: 0,
                 score: 0,
                 correctCount: 0,
@@ -1253,7 +1496,9 @@
 
             if (isCorrect) {
                 quizSession.correctCount++;
-                quizSession.score += (q.scoreValue || 10); // Default to 10 if scoreValue is missing
+                // --- SCORING CHANGE: Use 1 as fallback ---
+                quizSession.score += (q.scoreValue || 1);
+                // --- END SCORING CHANGE ---
                 playSound('correct');
             } else {
                 playSound('wrong');
@@ -1378,9 +1623,9 @@
 
 
                 html += `<div class="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                                 <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
-                                 <p class="text-sm text-gray-800">${explanationText}</p>
-                               </div>`;
+                                    <p class="font-semibold text-violet-600">${L('review-explanation-text')}:</p>
+                                    <p class="text-sm text-gray-800">${explanationText}</p>
+                                </div>`;
                 card.innerHTML = html;
                 reviewList.appendChild(card);
             });
@@ -1429,7 +1674,8 @@
             bottomNav.classList.toggle('hidden', !showNav);
 
             const backBtn = document.getElementById('header-back-btn');
-            const showBackBtn = viewHistory.length > 0 || ['quiz-result', 'review'].includes(viewName); // Show if history exists OR on result/review
+            // Show if history exists OR on result/review OR on practice screens
+            const showBackBtn = viewHistory.length > 0 || ['quiz-result', 'review', 'practice-number', 'practice-alphabet'].includes(viewName);
             backBtn.classList.toggle('hidden', !showBackBtn);
 
 
@@ -1471,6 +1717,14 @@
                     document.getElementById('header-title').textContent = 'Review';
                     renderReviewView();
                     break;
+                // NEW: Practice View Cases
+                case 'practice-number':
+                    document.getElementById('header-title').textContent = L('practice-number-title');
+                    break;
+                case 'practice-alphabet':
+                    document.getElementById('header-title').textContent = L('practice-alphabet-title');
+                    document.getElementById('practice-alphabet-nav-text').textContent = L('practice-alphabet-nav-text');
+                    break;
             }
             console.log("Current View:", currentView, "History:", viewHistory);
         };
@@ -1479,6 +1733,14 @@
             // Special case: from quiz or result, always go to dashboard and clear session
             if (currentView === 'quiz' || currentView === 'quiz-result' || currentView === 'review') {
                 quizSession = null;
+                viewHistory = []; // Clear history stack
+                renderView('dashboard');
+                return;
+            }
+            // NEW: Special case for practice modes
+            if (currentView === 'practice-number' || currentView === 'practice-alphabet') {
+                currentPracticeType = null;
+                currentPracticeIndex = 0;
                 viewHistory = []; // Clear history stack
                 renderView('dashboard');
                 return;
@@ -1518,6 +1780,9 @@
                 { id: 'regular', name: L('exam-regular'), emoji: '📚', color: 'bg-blue-500', isPremium: false },
                 { id: 'scholarship', name: L('exam-scholarship'), emoji: '🎓', color: 'bg-green-500', isPremium: true, premiumKey: 'isScholarshipPaid' },
                 { id: 'navodaya', name: L('exam-navodaya'), emoji: '🏫', color: 'bg-orange-500', isPremium: true, premiumKey: 'isNavodayaPaid' },
+                // NEW: Practice Modes
+                { id: 'practice-numbers', name: L('exam-practice-numbers'), emoji: '🔢', color: 'bg-teal-500', isPremium: false },
+                { id: 'practice-alphabet', name: L('exam-practice-alphabet'), emoji: '🔡', color: 'bg-pink-500', isPremium: false },
             ];
 
             examTypes.forEach((exam) => {
@@ -1535,6 +1800,10 @@
                 if (isLocked) {
                     // Pass the exam type ('scholarship' or 'navodaya') to the payment modal
                     card.onclick = () => showPaymentModal(exam.id, () => renderSubjectSelection(exam.id)); // Pay then proceed
+                } else if (exam.id === 'practice-numbers') {
+                    card.onclick = () => startPractice('numbers');
+                } else if (exam.id === 'practice-alphabet') {
+                    card.onclick = () => startPractice('alphabet');
                 } else {
                     card.onclick = () => renderSubjectSelection(exam.id);
                 }
@@ -1542,6 +1811,58 @@
                 gridContainer.appendChild(card);
             });
         };
+
+        // --- NEW: Practice Mode Logic ---
+        const startPractice = (type) => {
+            currentPracticeType = type;
+            currentPracticeIndex = 0;
+            if (type === 'numbers') {
+                renderView('practice-number');
+            } else {
+                renderView('practice-alphabet');
+            }
+            updatePracticeDisplay();
+            speakCurrentPracticeItem(); // --- AUTO-PLAY ---
+        };
+
+        const updatePracticeDisplay = () => {
+            let data, item, viewId, navId;
+
+            if (currentPracticeType === 'numbers') {
+                data = PRACTICE_DATA.numbers;
+                viewId = 'practice-number-text';
+                navId = 'practice-number-nav-text';
+            } else {
+                data = PRACTICE_DATA[currentLanguage] || PRACTICE_DATA.en;
+                viewId = 'practice-alphabet-text';
+                navId = 'practice-alphabet-nav-text';
+            }
+
+            item = data[currentPracticeIndex];
+            document.getElementById(viewId).textContent = item;
+            document.getElementById(navId).textContent = `${L(navId)} (${currentPracticeIndex + 1}/${data.length})`;
+        };
+
+        const navigatePractice = (direction) => {
+            let data = (currentPracticeType === 'numbers') ? PRACTICE_DATA.numbers : (PRACTICE_DATA[currentLanguage] || PRACTICE_DATA.en);
+
+            if (direction === 'next') {
+                currentPracticeIndex++;
+            } else {
+                currentPracticeIndex--;
+            }
+
+            // Bounds checking
+            if (currentPracticeIndex >= data.length) {
+                currentPracticeIndex = 0;
+            }
+            if (currentPracticeIndex < 0) {
+                currentPracticeIndex = data.length - 1;
+            }
+            updatePracticeDisplay();
+            speakCurrentPracticeItem(); // --- AUTO-PLAY ---
+        };
+
 
         // --- NEW: Subject Selection ---
         const renderSubjectSelection = async (examType) => {
@@ -1691,12 +2012,12 @@
                     <div class="flex items-center space-x-4">
                         <div class="text-3xl">${diff.emoji}</div>
                         <div>
-                                 <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
-                                 <p class="font-semibold text-sm opacity-90">${subject}</p>
+                                <p class="text-xl font-bold">${diff.label[currentLanguage]}</p>
+                                <p class="font-semibold text-sm opacity-90">${subject}</p>
                         </div>
                     </div>
-                    <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Score: x${difficultyKey === 'hard' ? 3 : difficultyKey === 'medium' ? 2 : 1}</span>
-                 `;
+                    <span class="font-semibold text-sm border border-white px-3 py-1 rounded-full">Score: 1pt</span>
+                    `;
                 card.onclick = () => startQuiz(subject, difficultyKey, false); // This is the OTDB quiz
                 list.appendChild(card);
             });
@@ -1839,17 +2160,20 @@
                 const card = document.createElement('div');
                 // Show a yellow border if user has *any* premium access
                 card.className = `p-3 bg-white rounded-xl shadow-lg flex items-center justify-between transition duration-150 transform hover:scale-[1.01] border-b-2 ${hasPremium(user) ? 'border-yellow-400' : 'border-violet-200'}`;
+
+                // --- LEADERBOARD CHANGE: Show School Name ---
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <span class="text-xl font-extrabold w-8 text-center ${rankColor}">#${rank}</span>
                         <img src="${user.photoURL}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/40x40/8b5cf6/ffffff?text=P';" alt="Profile">
                         <div>
                             <p class="font-bold text-gray-800 truncate max-w-[150px]">${user.name} ${hasPremium(user) ? '⭐' : ''}</p>
-                            <p class="text-xs text-gray-500">${user.standard}th, ${user.medium}</p>
+                            <p class="text-xs text-gray-500">${user.schoolName || 'School Not Set'}</p>
                         </div>
                     </div>
                     <span class="text-2xl font-bold text-violet-600">${user.score || 0}</span>
-                 `;
+                    `;
+                // --- END LEADERBOARD CHANGE ---
                 list.appendChild(card);
             });
         };
@@ -1892,7 +2216,7 @@
                         <span class="font-semibold text-violet-600">Score: ${session.score} ${statusEmoji}</span>
                         <span class="font-semibold text-gray-700">Correct: ${session.correctCount}/${totalQuestions}</span>
                     </div>
-                 `;
+                    `;
                 list.appendChild(card);
             });
         };
@@ -1942,6 +2266,12 @@
             document.getElementById('lang-select').value = currentLanguage;
             localizeElements();
 
+            // --- NEW: Add listeners to unlock audio on first interaction ---
+            document.body.addEventListener('click', unlockAudio, { once: false });
+            document.body.addEventListener('touchstart', unlockAudio, { once: false });
+            // 'once: false' is implicit, but good to be clear.
+            // The `unlockAudio` function itself will remove the listener.
+
             // Hook the improved Google sign-in button
             const googleBtn = document.getElementById('google-sign-in-btn');
             if (googleBtn) {
@@ -1972,6 +2302,17 @@
                 currentLanguage = e.target.value;
                 localStorage.setItem('smartkid_lang', currentLanguage);
                 localizeElements();
+                // If in a practice view, update the display immediately
+                if (currentView === 'practice-alphabet') {
+                    currentPracticeIndex = 0; // Reset index on lang change
+                    updatePracticeDisplay();
+                    speakCurrentPracticeItem(); // --- AUTO-PLAY ---
+                }
+                // --- NEW: Also auto-play for numbers view ---
+                if (currentView === 'practice-number') {
+                    updatePracticeDisplay(); // Update nav text
+                    speakCurrentPracticeItem(); // --- AUTO-PLAY ---
+                }
             });
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1983,6 +2324,22 @@
                     renderView(view);
                 });
             });
+
+            // --- UPDATED: Event Listeners for Practice Modes (using helper) ---
+            // Numbers
+            document.getElementById('practice-number-speak-btn').addEventListener('click', () => {
+                speakCurrentPracticeItem();
+            });
+            document.getElementById('practice-number-prev-btn').addEventListener('click', () => navigatePractice('prev'));
+            document.getElementById('practice-number-next-btn').addEventListener('click', () => navigatePractice('next'));
+
+            // Alphabet
+            document.getElementById('practice-alphabet-speak-btn').addEventListener('click', () => {
+                speakCurrentPracticeItem();
+            });
+            document.getElementById('practice-alphabet-prev-btn').addEventListener('click', () => navigatePractice('prev'));
+            document.getElementById('practice-alphabet-next-btn').addEventListener('click', () => navigatePractice('next'));
+
 
             if (!currentUser) {
                 renderView('login');
