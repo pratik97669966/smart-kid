@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kids Quiz Game — सुधारित व स्थिर आवृत्ती</title>
+<style>
+  :root{--card:#ffffff;--bg:#FFF8E6;--accent:#FFB74D;--accent-dark:#FF9800;--muted:#666}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Arial; background:linear-gradient(180deg,#FFF8E6,#FFF3DF);color:#222}
+  .container{max-width:920px;margin:12px auto;padding:12px}
+  .card{background:var(--card);border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+  .controls{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  select,input[type=range],.btn{padding:10px;border-radius:10px;border:2px solid #f0d5b0;font-size:16px}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;border:none;cursor:pointer}
+  .top-row{display:flex;gap:12px;margin-top:12px}
+  .left{flex:1}
+  .right{width:280px}
+  #game{margin-top:14px;display:none}
+  #image-wrap{display:flex;justify-content:center;align-items:center;padding:10px}
+  #item-image{width:520px;height:380px;object-fit:cover;border-radius:12px;background:#fff;padding:8px}
+  #item-label{margin-top:8px;font-weight:700;font-size:18px;visibility:hidden}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .opt{padding:12px;border-radius:12px;border:2px solid #e9d9bf;background:#fff;font-size:18px;cursor:pointer;transition:transform .12s ease,box-shadow .12s}
+  .opt:active{transform:scale(.98)}
+  .opt.correct{border-color:#2e7d32;box-shadow:0 10px 30px rgba(46,125,50,0.12)}
+  .opt.wrong{border-color:#c62828}
+  .message{margin-top:12px;font-size:20px;font-weight:700;min-height:30px}
+  .scoreboard{display:flex;flex-direction:column;gap:10px}
+  @media (max-width:900px){ #item-image{width:420px;height:300px} .right{width:100%} .top-row{flex-direction:column} .options{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header style="display:flex;align-items:center;gap:12px">
+    <img src="https://i.imgur.com/LKX6hP8.png" alt="logo" style="width:56px;height:56px;border-radius:10px;object-fit:cover">
+    <h1>🎯 ओळखा आणि शिका — स्थिर आवृत्ती</h1>
+  </header>
+
+  <div class="card controls">
+    <select id="category-select">
+      <option value="fruits">फळे</option>
+      <option value="flowers">फुले</option>
+      <option value="pets">पाळीव प्राणी</option>
+      <option value="wild">जंगली प्राणी</option>
+      <option value="grains">धान्य</option>
+      <option value="veggies">भाजीपाला</option>
+      <option value="daily">रोजच्या वस्तू</option>
+      <option value="vehicles">वाहने</option>
+    </select>
+
+    <select id="level-select">
+      <option value="easy">सोपे</option>
+      <option value="medium">मध्यम</option>
+      <option value="hard">कठीण</option>
+    </select>
+
+    <label>भाषा:
+      <select id="lang"><option value="mr">मराठी</option><option value="hi">हिंदी</option><option value="en">English</option></select>
+    </label>
+
+    <button class="btn" id="start-btn">गेम सुरू करा</button>
+    <button class="btn" id="export-btn" style="background:#4D96FF">Export ZIP</button>
+  </div>
+
+  <div class="top-row">
+    <div class="left card">
+      <div id="game">
+        <div id="image-wrap"><img id="item-image" src="" alt="item"><div id="item-label"></div></div>
+        <div id="options" class="options" role="list"></div>
+        <div id="message" class="message" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <aside class="right card scoreboard">
+      <div>🏆 स्कोअर: <span id="score">0</span></div>
+      <div>प्रश्न: <span id="qnum">0</span></div>
+      <div>योग्य: <span id="correctCount">0</span></div>
+      <div>चुकीचे: <span id="wrongCount">0</span></div>
+      <div style="margin-top:8px">टाइमर (सेकंद): <span id="timer-seconds">--</span>
+        <div style="margin-top:6px"><input type="range" id="timer-range" min="0" max="30" value="0"> (0 = no timer)</div>
+      </div>
+      <div style="margin-top:8px"><button class="btn" id="reset-btn" style="background:#FF6B6B">Reset Score</button></div>
+    </aside>
+  </div>
+
+  <footer style="margin-top:10px;text-align:center;color:#666">Now: larger image set, fixed matching logic, bigger recent-history to avoid repeats.</footer>
+</div>
+<canvas id="confetti"></canvas>
+
+<audio id="sound-correct" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="sound-wrong" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ======= Expanded DATA set with unique images and many items per category =======
+const DATA = {
+  fruits: [
+    {id:'apple', name:{mr:'सफरचंद',hi:'सेब',en:'Apple'}, img:'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=1200&q=80'},
+    {id:'banana', name:{mr:'केळे',hi:'केला',en:'Banana'}, img:'https://images.unsplash.com/photo-1574226516831-e2926a3a22a8?w=1200&q=80'},
+    {id:'mango', name:{mr:'आंबा',hi:'आम',en:'Mango'}, img:'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=1200&q=80'},
+    {id:'orange', name:{mr:'संत्रा',hi:'सन्तरा',en:'Orange'}, img:'https://images.unsplash.com/photo-1571047399553-8f4b6abf0b33?w=1200&q=80'},
+    {id:'grape', name:{mr:'द्राक्षे',hi:'अंगूर',en:'Grapes'}, img:'https://images.unsplash.com/photo-1502741126161-b048400d7c6f?w=1200&q=80'},
+    {id:'pineapple', name:{mr:'अननस',hi:'अनानास',en:'Pineapple'}, img:'https://images.unsplash.com/photo-1505575979630-8f4c3b2f0f7c?w=1200&q=80'}
+  ],
+  flowers: [
+    {id:'rose', name:{mr:'गुलाब',hi:'गुलाब',en:'Rose'}, img:'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=1200&q=80'},
+    {id:'lotus', name:{mr:'कमळ',hi:'कमल',en:'Lotus'}, img:'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=1200&q=80'},
+    {id:'marigold', name:{mr:'गेंदा',hi:'गेंदा',en:'Marigold'}, img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80'}
+  ],
+  pets: [
+    {id:'dog', name:{mr:'कुत्रा',hi:'कुत्ता',en:'Dog'}, img:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=1200&q=80'},
+    {id:'cat', name:{mr:'मांजर',hi:'बिल्ली',en:'Cat'}, img:'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?w=1200&q=80'},
+    {id:'parrot', name:{mr:'तोता',hi:'तोता',en:'Parrot'}, img:'https://images.unsplash.com/photo-1518085250887-5c20e8a6f9a6?w=1200&q=80'}
+  ],
+  wild: [
+    {id:'lion', name:{mr:'सिंह',hi:'शेर',en:'Lion'}, img:'https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=1200&q=80'},
+    {id:'tiger', name:{mr:'वाघ',hi:'बाघ',en:'Tiger'}, img:'https://images.unsplash.com/photo-1542042167279-1b0b4e78f1d9?w=1200&q=80'},
+    {id:'deer', name:{mr:'हिरण',hi:'हिरण',en:'Deer'}, img:'https://images.unsplash.com/photo-1504198458649-3128b932f49b?w=1200&q=80'}
+  ],
+  grains: [
+    {id:'wheat', name:{mr:'गहू',hi:'गेहूं',en:'Wheat'}, img:'https://images.unsplash.com/photo-1526631393860-3b7b8f3f1b80?w=1200&q=80'},
+    {id:'rice', name:{mr:'तांदूळ',hi:'चावल',en:'Rice'}, img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=80'}
+  ],
+  veggies: [
+    {id:'tomato', name:{mr:'टोमॅटो',hi:'टमाटर',en:'Tomato'}, img:'https://images.unsplash.com/photo-1582515073490-39981397a1b9?w=1200&q=80'},
+    {id:'potato', name:{mr:'बटाटा',hi:'आलू',en:'Potato'}, img:'https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=1200&q=80'},
+    {id:'onion', name:{mr:'कांदा',hi:'प्याज़',en:'Onion'}, img:'https://images.unsplash.com/photo-1582515073490-39981397a1b9?w=1200&q=80'}
+  ],
+  daily: [
+    {id:'clock', name:{mr:'घड्याळ',hi:'घड़ी',en:'Clock'}, img:'https://images.unsplash.com/photo-1506269081688-1b1a9a4a1c6b?w=1200&q=80'},
+    {id:'cup', name:{mr:'कप',hi:'कप',en:'Cup'}, img:'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1200&q=80'}
+  ],
+  vehicles: [
+    {id:'car', name:{mr:'कार',hi:'कार',en:'Car'}, img:'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=80'},
+    {id:'bicycle', name:{mr:'सायकल',hi:'सायकल',en:'Bicycle'}, img:'https://images.unsplash.com/photo-1516117172878-fd2c41f4a759?w=1200&q=80'},
+    {id:'bus', name:{mr:'बस',hi:'बस',en:'Bus'}, img:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80'}
+  ]
+};
+
+// ===== UI refs =====
+const startBtn = document.getElementById('start-btn');
+const exportBtn = document.getElementById('export-btn');
+const catSelect = document.getElementById('category-select');
+const levelSelect = document.getElementById('level-select');
+const langSelect = document.getElementById('lang');
+const gameDiv = document.getElementById('game');
+const imgEl = document.getElementById('item-image');
+const optionsDiv = document.getElementById('options');
+const msgEl = document.getElementById('message');
+const scoreEl = document.getElementById('score');
+const qnumEl = document.getElementById('qnum');
+const correctCountEl = document.getElementById('correctCount');
+const wrongCountEl = document.getElementById('wrongCount');
+const timerRange = document.getElementById('timer-range');
+const timerSecondsText = document.getElementById('timer-seconds');
+const resetBtn = document.getElementById('reset-btn');
+const soundCorrect = document.getElementById('sound-correct');
+const soundWrong = document.getElementById('sound-wrong');
+
+// state + recent history to avoid repeats
+let state = {score:0,qnum:0,correct:0,wrong:0,current:null,allowClicks:true,timer:null,timeLeft:0};
+const recentHistory = {}; // recentHistory[category] = [lastIds]
+const RECENT_MAX = 6; // increased to reduce repeats
+
+// helper: normalize strings (trim + unicode NFC)
+function norm(str){ if(!str) return ''; try{ return str.trim().normalize('NFC'); }catch(e){ return str.trim(); } }
+
+// timer UI
+timerRange.addEventListener('input', ()=>{ timerSecondsText.textContent = timerRange.value === '0' ? '--' : timerRange.value })
+
+// start
+startBtn.addEventListener('click', ()=>{ gameDiv.style.display='block'; loadQuestion(); });
+
+// reset
+resetBtn.addEventListener('click', ()=>{ state={score:0,qnum:0,correct:0,wrong:0,current:null,allowClicks:true,timer:null}; updateScoreboard(); msgEl.textContent='स्कोअर रीसेट झाला'; Object.keys(recentHistory).forEach(k=>recentHistory[k]=[]); });
+
+// export
+exportBtn.addEventListener('click', async ()=>{ const zip = new JSZip(); const htmlContent = document.documentElement.outerHTML; zip.file('index.html', htmlContent); const blob = await zip.generateAsync({type:'blob'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='kids_quiz_game.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+
+function updateScoreboard(){ scoreEl.textContent=state.score; qnumEl.textContent=state.qnum; correctCountEl.textContent=state.correct; wrongCountEl.textContent=state.wrong }
+
+// choose unique item
+function chooseUniqueItem(items, category){ if(!recentHistory[category]) recentHistory[category]=[]; const ids = items.map(i=>i.id); const candidates = ids.filter(id=> !recentHistory[category].includes(id)); const pickId = (candidates.length>0) ? candidates[Math.floor(Math.random()*candidates.length)] : ids[Math.floor(Math.random()*ids.length)]; recentHistory[category].push(pickId); if(recentHistory[category].length>RECENT_MAX) recentHistory[category].shift(); return items.find(i=>i.id===pickId); }
+
+// load question
+async function loadQuestion(){
+  state.allowClicks = true; msgEl.textContent='';
+  if(state.timer){ clearInterval(state.timer); state.timer=null }
+  const cat = catSelect.value; const level = levelSelect.value; const lang = langSelect.value; const items = DATA[cat] || [];
+  if(items.length===0){ msgEl.textContent = translate('This category is empty',lang); return }
+
+  // pick unique correct item
+  const correct = chooseUniqueItem(items, cat); state.current = correct;
+
+  // preload high-res image and set
+  try{
+    const img = new Image(); img.crossOrigin='anonymous'; img.src = correct.img + '&auto=format&fit=crop'; await new Promise((res,rej)=>{ img.onload=res; img.onerror=()=>res(); }); imgEl.src = img.src; imgEl.alt = correct.name[lang];
+  }catch(e){ imgEl.src = correct.img; imgEl.alt = correct.name[lang]; }
+
+  // prepare options
+  const allItems = Object.values(DATA).flat();
+  const optionSet = new Set(); optionSet.add(norm(correct.name[lang]));
+
+  // prefer wrong options from same category
+  const sameCat = items.map(i=>norm(i.name[lang])).filter(n=>n!==norm(correct.name[lang])); shuffleArray(sameCat);
+  for(const n of sameCat){ if(optionSet.size>=4) break; optionSet.add(n); }
+
+  // then other categories
+  const others = allItems.map(i=>norm(i.name[lang])).filter(n=>!optionSet.has(n)); shuffleArray(others);
+  for(const n of others){ if(optionSet.size>=4) break; optionSet.add(n); }
+
+  const options = shuffleArray(Array.from(optionSet));
+
+  // render options
+  optionsDiv.innerHTML='';
+  options.forEach(opt=>{
+    const btn = document.createElement('button'); btn.className='opt'; btn.innerText = opt; btn.dataset.value = opt; btn.addEventListener('click', ()=> onSelect(btn,opt,lang)); optionsDiv.appendChild(btn);
+  });
+
+  state.qnum++; updateScoreboard();
+
+  // timer
+  const t = parseInt(timerRange.value,10); if(t>0){ state.timeLeft=t; timerSecondsText.textContent=state.timeLeft; state.timer=setInterval(()=>{ state.timeLeft--; timerSecondsText.textContent=state.timeLeft; if(state.timeLeft<=0){ clearInterval(state.timer); state.timer=null; onTimeUp(lang); } },1000); }
+}
+
+function onSelect(btn, text, lang){ if(!state.allowClicks) return; const correctText = norm(state.current.name[lang]); const selected = norm(text);
+  if(selected === correctText){ state.allowClicks=false; btn.classList.add('correct'); state.score += (levelSelect.value==='hard'?30: levelSelect.value==='medium'?20:10); state.correct++; updateScoreboard(); msgEl.textContent = translate('Very Good!',lang); speak(translate('Very Good!',lang), lang); soundCorrect.play(); startConfetti(); imgEl.classList.add('celebrate'); setTimeout(()=>{ stopConfetti(); loadQuestion(); },1400);
+  } else { btn.classList.add('wrong'); state.wrong++; state.score = Math.max(0,state.score-2); updateScoreboard(); msgEl.textContent = translate('Wrong — try again',lang); speak(translate('Wrong, try again',lang), lang); soundWrong.play(); }
+}
+
+function onTimeUp(lang){ state.allowClicks=false; msgEl.textContent = translate('Time up!',lang); speak(translate('Time up!',lang), lang); setTimeout(()=> loadQuestion(),1200); }
+
+function shuffleArray(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+
+const TRANSLATIONS = { 'Very Good!':{mr:'खूप छान!',hi:'बहुत अच्छा!',en:'Very good!'}, 'Wrong — try again':{mr:'चुकलं — पुन्हा प्रयत्न करा',hi:'गलत — फिर से कोशिश करो',en:'Wrong — try again'}, 'Wrong, try again':{mr:'चुकलं, पुन्हा प्रयत्न करा',hi:'गलत, फिर से कोशिश करो',en:'Wrong, try again'}, 'Time up!':{mr:'वेळ संपली!',hi:'समय समाप्त!',en:'Time up!'}, 'This category is empty':{mr:'ही श्रेणी सध्या रिकामी आहे',hi:'यह श्रेणी अभी खाली है',en:'This category is empty'} };
+function translate(text,lang){ return (TRANSLATIONS[text] && TRANSLATIONS[text][lang]) || (TRANSLATIONS[text] && TRANSLATIONS[text]['mr']) || text }
+
+function speak(text, lang){ if(!('speechSynthesis' in window)) return; const u=new SpeechSynthesisUtterance(text); let voices = speechSynthesis.getVoices(); if(!voices || voices.length===0){ setTimeout(()=> speak(text, lang),200); return; } let pref = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith(lang)); if(!pref && lang==='mr') pref = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('hi')); if(pref) u.voice = pref; u.lang = (lang==='mr'?'mr-IN':(lang==='hi'?'hi-IN':'en-US')); u.rate=0.95; try{ speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
+
+// confetti
+const confCanvas=document.getElementById('confetti'); const ctx=confCanvas.getContext('2d'); let pieces=[]; function resize(){ confCanvas.width=window.innerWidth; confCanvas.height=window.innerHeight } window.addEventListener('resize',resize); resize(); function startConfetti(){ pieces=[]; for(let i=0;i<80;i++){ pieces.push({x:Math.random()*confCanvas.width,y:Math.random()*-confCanvas.height,w:6+Math.random()*10,h:8+Math.random()*10,vy:2+Math.random()*4,ang:Math.random()*360,va:2+Math.random()*6}) } requestAnimationFrame(draw); } function draw(){ ctx.clearRect(0,0,confCanvas.width,confCanvas.height); pieces.forEach(p=>{ p.x+=Math.cos(p.ang)*0.6; p.y+=p.vy; p.ang+=p.va*0.01; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.ang*0.01); ctx.fillStyle=['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#FF8C42'][Math.floor(Math.random()*5)]; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }); pieces=pieces.filter(p=>p.y<confCanvas.height+50); if(pieces.length>0) requestAnimationFrame(draw); } function stopConfetti(){ pieces=[]; ctx.clearRect(0,0,confCanvas.width,confCanvas.height); }
+
+if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged = ()=>{} }
+</script>
+</body>
+</html>
